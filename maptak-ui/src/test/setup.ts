@@ -21,7 +21,7 @@ vi.mock('leaflet', () => {
       marker,
       divIcon: vi.fn(() => ({})),
       icon: vi.fn(() => ({})),
-      polyline: vi.fn(() => ({ addTo: vi.fn().mockReturnThis(), remove: vi.fn() })),
+      polyline: vi.fn(() => ({ addTo: vi.fn().mockReturnThis(), remove: vi.fn(), bindPopup: vi.fn().mockReturnThis() })),
       polygon: vi.fn(() => ({ addTo: vi.fn().mockReturnThis(), bindPopup: vi.fn().mockReturnThis() })),
       circleMarker: vi.fn(() => ({ addTo: vi.fn().mockReturnThis(), bindPopup: vi.fn().mockReturnThis() })),
       Point: vi.fn((x: number, y: number) => ({ x, y })),
