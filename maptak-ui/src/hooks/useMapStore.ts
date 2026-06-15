@@ -19,15 +19,20 @@ export const useMapStore = create<MapStore>((set, get) => ({
       const euds = { ...state.euds, [eud.uid]: eud }
       // LRU eviction powyżej limitu — usuwa najstarzej widziane
       const keys = Object.keys(euds)
+      let tracks = state.tracks
       if (keys.length > MAX_EUDS) {
-        keys
+        const evicted = keys
           .sort((a, b) =>
             (euds[a].last_event_time ?? '').localeCompare(euds[b].last_event_time ?? ''),
           )
           .slice(0, keys.length - MAX_EUDS)
-          .forEach((k) => delete euds[k])
+        evicted.forEach((k) => delete euds[k])
+        if (evicted.length > 0) {
+          tracks = { ...state.tracks }
+          evicted.forEach((k) => delete tracks[k])
+        }
       }
-      return { euds }
+      return { euds, tracks }
     }),
 
   appendTrack: (uid: string, point: [number, number]) =>

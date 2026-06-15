@@ -7,6 +7,8 @@ export default function TrackLayer() {
   const map      = useMap()
   const tracks   = useMapStore((s) => s.tracks)
   const segsRef  = useRef<Record<string, L.Polyline[]>>({})
+  // Track point counts per UID to detect changes
+  const ptCountRef = useRef<Record<string, number>>({})
   const layerRef = useRef<L.LayerGroup | null>(null)
 
   useEffect(() => {
@@ -17,12 +19,30 @@ export default function TrackLayer() {
   useEffect(() => {
     if (!layerRef.current) return
 
-    // Usuń poprzednie segmenty
-    Object.values(segsRef.current).flat().forEach((p) => p.remove())
-    segsRef.current = {}
+    const currentUids = new Set(Object.keys(tracks))
 
-    Object.entries(tracks).forEach(([uid, pts]) => {
-      if (pts.length < 2) return
+    // Remove polylines for evicted UIDs
+    for (const uid of Object.keys(segsRef.current)) {
+      if (!currentUids.has(uid)) {
+        segsRef.current[uid].forEach((p) => p.remove())
+        delete segsRef.current[uid]
+        delete ptCountRef.current[uid]
+      }
+    }
+
+    // Only redraw tracks whose point count changed
+    for (const [uid, pts] of Object.entries(tracks)) {
+      if (ptCountRef.current[uid] === pts.length) continue
+
+      // Remove old segments for this UID
+      segsRef.current[uid]?.forEach((p) => p.remove())
+
+      if (pts.length < 2) {
+        segsRef.current[uid] = []
+        ptCountRef.current[uid] = pts.length
+        continue
+      }
+
       const segments: L.Polyline[] = []
       for (let i = 1; i < pts.length; i++) {
         const opacity = 0.15 + (i / (pts.length - 1)) * 0.85
@@ -34,7 +54,8 @@ export default function TrackLayer() {
         segments.push(seg)
       }
       segsRef.current[uid] = segments
-    })
+      ptCountRef.current[uid] = pts.length
+    }
   }, [tracks])
 
   return null
