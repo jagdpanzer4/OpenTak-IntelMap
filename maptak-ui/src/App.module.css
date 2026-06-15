@@ -1,0 +1,17 @@
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.layoutWithPanel {
+  grid-template-columns: 240px 1fr 220px;
+}
+
+.mapWrapper {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
