@@ -4,7 +4,7 @@ description = "Tactical map plugin for OpenTAKServer"
 authors = [{name = "OpenTAKIntel"}]
 readme = "README.md"
 license = "GPL-3.0-or-later"
-dynamic = ["entry-points", "version"]
+dynamic = ["version"]
 
 [tool.poetry]
 include = [{path = "ots_maptak/ui/**/*", format = ["sdist", "wheel"]}]
