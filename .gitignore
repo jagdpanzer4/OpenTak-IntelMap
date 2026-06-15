@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+.venv/
+venv/
+
+# Node
+maptak-ui/node_modules/
+maptak-ui/dist/
+
+# Generated UI (rebuilt by make build)
+ots_maptak/ui/
+
+# Misc
+.DS_Store
+*.whl

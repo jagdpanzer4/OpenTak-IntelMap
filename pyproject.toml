@@ -1,0 +1,40 @@
+[project]
+name = "ots-maptak"
+description = "Tactical map plugin for OpenTAKServer"
+authors = [{name = "OpenTAKIntel"}]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+dynamic = ["entry-points", "version"]
+
+[tool.poetry]
+include = [{path = "ots_maptak/ui/**/*", format = ["sdist", "wheel"]}]
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+python = ">=3.10, <4.0"
+opentakserver = ">=1.7.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.0"
+flask = "^3.0"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+dirty = false
+pattern = "((?P<epoch>\\d+)!)?(?P<base>\\d+(\\.\\d+)*)"
+
+[tool.poetry-dynamic-versioning.files."ots_maptak/__init__.py"]
+persistent-substitution = true
+initial-content = """
+  __version__ = "0.0.0"
+  __version_tuple__ = (0, 0, 0)
+"""
+
+[build-system]
+requires = ["poetry-core>=2.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0", "setuptools"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[project.entry-points.'opentakserver.plugin']
+ots_maptak = 'ots_maptak.app:MapTAKPlugin'
