@@ -1,0 +1,132 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: #16213e;
+  border-right: 1px solid #0f3460;
+  font-family: 'Inter', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.header {
+  padding: 8px 12px;
+  background: #0f3460;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e94560;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.filters {
+  padding: 6px 8px;
+  background: #0d1b2a;
+  flex-shrink: 0;
+}
+
+.search {
+  width: 100%;
+  padding: 4px 8px;
+  background: #0f3460;
+  border: 1px solid #1a4a8a;
+  border-radius: 4px;
+  color: #a0c4ff;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+}
+
+.search::placeholder { color: #4a6a8a; }
+
+.toggles {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.toggle {
+  background: #1a2744;
+  border: 1px solid #0f3460;
+  border-radius: 10px;
+  color: #888;
+  font-size: 9px;
+  font-family: inherit;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+
+.toggle.active {
+  background: #0f3460;
+  color: #a0c4ff;
+  border-color: #1a4a8a;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.eudRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid #0f3460;
+  cursor: pointer;
+}
+
+.eudRow:hover { background: #1a2744; }
+.eudRow.selected { background: #1a2744; border-left: 2px solid #58a6ff; }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.dotOnline  { background: #00ff88; }
+.dotOffline { background: #555; }
+
+.callsign {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.meta {
+  font-size: 9px;
+  color: #555;
+  margin-top: 1px;
+}
+
+.missionRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-bottom: 1px solid #0a1520;
+  font-size: 10px;
+  color: #ffd700;
+}
+
+.missionIcon { font-size: 12px; }
+.missionName { color: #ffd700; font-weight: 600; }
+
+.footer {
+  padding: 6px 12px;
+  background: #0f3460;
+  font-size: 10px;
+  color: #888;
+  border-top: 1px solid #1a4a8a;
+  flex-shrink: 0;
+}
+
+.online  { color: #00ff88; }
+.offline { color: #ff4444; }
+.mission { color: #ffd700; }
