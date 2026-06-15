@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MapTAK Plugin Architecture</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  padding: 24px;
+}
+h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: #8b949e; margin-bottom: 20px; }
+
+.winner-box {
+  border: 2px solid #3fb950;
+  border-radius: 10px;
+  padding: 16px 20px;
+  background: #0d1a0d;
+  margin-bottom: 20px;
+}
+.winner-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #3fb950;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.winner-title { font-size: 16px; font-weight: 700; color: #f0f6fc; margin-bottom: 6px; }
+.winner-desc { font-size: 13px; color: #8b949e; }
+
+.flow-wrap {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #161b22;
+}
+.flow-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8b949e;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.step-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 12px;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1c2d40;
+  border: 2px solid #58a6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #58a6ff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-line {
+  width: 2px;
+  background: #21262d;
+  margin: 28px auto 0;
+  height: 100%;
+}
+.step-content {
+  padding: 0 0 0 12px;
+  flex: 1;
+}
+.step-name { font-size: 13px; font-weight: 600; color: #f0f6fc; }
+.step-detail { font-size: 12px; color: #8b949e; margin-top: 2px; }
+.step-cmd {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #79c0ff;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.struct-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.struct-box {
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #161b22;
+}
+.struct-header {
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.struct-body {
+  padding: 12px 14px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.dir { color: #79c0ff; }
+.file { color: #c9d1d9; }
+.comment { color: #484f58; }
+.highlight { color: #3fb950; font-weight: 600; }
+
+.badge {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.badge-green { background: #1a2e1a; color: #3fb950; border: 1px solid #2ea043; }
+.badge-blue { background: #1c2d40; color: #58a6ff; border: 1px solid #1f6feb; }
+.badge-yellow { background: #2d2a1a; color: #e3b341; border: 1px solid #9e6a03; }
+
+.benefit-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.benefit {
+  flex: 1;
+  min-width: 160px;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #161b22;
+}
+.benefit-icon { font-size: 18px; margin-bottom: 6px; }
+.benefit-name { font-size: 12px; font-weight: 600; color: #f0f6fc; margin-bottom: 3px; }
+.benefit-desc { font-size: 11px; color: #8b949e; }
+</style>
+</head>
+<body>
+
+<h2>MapTAK — architektura pluginu OpenTAK</h2>
+<p class="subtitle">Zero zmian w bazowym UI · instalacja przez Plugin Manager · niezależne aktualizacje</p>
+
+<!-- WINNER -->
+<div class="winner-box">
+  <div class="winner-label">✅ Rekomendowane podejście</div>
+  <div class="winner-title">Python Backend Plugin + React SPA w iframe</div>
+  <div class="winner-desc">
+    Jeden plik <code>.whl</code> instalowany przez Plugin Manager. Backend Flask serwuje zbudowaną aplikację React.
+    OpenTAK UI ładuje ją w iframe pod zakładką "UI". Żadnych modyfikacji w bazowym OpenTAK UI.
+  </div>
+</div>
+
+<!-- STRUCTURE -->
+<div class="struct-grid">
+  <div class="struct-box">
+    <div class="struct-header" style="background:#1c2d40; color:#58a6ff">Struktura repo (ots-maptak)</div>
+    <div class="struct-body">
+<span class="dir">ots-maptak/</span>
+├── <span class="dir">ots_maptak/</span>           <span class="comment"># Python package</span>
+│   ├── <span class="file">__init__.py</span>
+│   ├── <span class="highlight">app.py</span>           <span class="comment"># Flask Blueprint</span>
+│   ├── <span class="file">default_config.py</span>
+│   └── <span class="dir highlight">ui/</span>              <span class="comment"># zbudowany Vite</span>
+│       ├── <span class="file">index.html</span>
+│       └── <span class="dir">assets/</span>
+│           ├── <span class="file">index.js</span>
+│           └── <span class="file">index.css</span>
+│
+├── <span class="dir">maptak-ui/</span>           <span class="comment"># React + Vite źródła</span>
+│   ├── <span class="dir">src/</span>
+│   │   ├── <span class="file">MapTAK.tsx</span>
+│   │   ├── <span class="dir">components/</span>
+│   │   ├── <span class="dir">map/</span>
+│   │   └── <span class="dir">hooks/</span>
+│   ├── <span class="file">package.json</span>
+│   └── <span class="file">vite.config.ts</span>
+│
+└── <span class="highlight">pyproject.toml</span>       <span class="comment"># Poetry build</span>
+    </div>
+  </div>
+
+  <div class="struct-box">
+    <div class="struct-header" style="background:#1a2e1a; color:#3fb950">Jak to działa w OpenTAK</div>
+    <div class="struct-body">
+<span class="comment"># 1. Zainstaluj plugin (.whl)</span>
+Plugin Manager → Upload Plugin
+→ restart OpenTAKServer
+
+<span class="comment"># 2. Dostęp do mapy</span>
+OpenTAK UI → Plugins
+→ MapTAK → zakładka "UI"
+→ iframe z pełną mapą
+
+<span class="comment"># 3. Ten sam origin</span>
+socket.io ✓  <span class="comment"># ciasteczka auth</span>
+/api/map_state ✓
+/api/missions ✓
+<span class="highlight"># Żadnych CORS, żadnych tokenów</span>
+
+<span class="comment"># 4. Update pluginu</span>
+Plugin Manager → Delete → Upload
+<span class="highlight"># Bazowy UI NIEZMIENIONY</span>
+    </div>
+  </div>
+</div>
+
+<!-- BUILD FLOW -->
+<div class="flow-wrap">
+  <div class="flow-title">Proces budowania i wdrożenia</div>
+
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div style="text-align:center">
+      <div style="background:#1c2d40;border:1px solid #58a6ff;border-radius:6px;padding:8px 14px;font-size:12px;color:#58a6ff;font-weight:600">Edytujesz<br>maptak-ui/src/</div>
+    </div>
+    <div style="color:#30363d;font-size:20px">→</div>
+    <div style="text-align:center">
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 14px;font-size:11px;color:#c9d1d9">
+        <span style="font-family:monospace;color:#79c0ff">npm run build</span><br>
+        <span style="color:#484f58">→ ots_maptak/ui/</span>
+      </div>
+    </div>
+    <div style="color:#30363d;font-size:20px">→</div>
+    <div style="text-align:center">
+      <div style="background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 14px;font-size:11px;color:#c9d1d9">
+        <span style="font-family:monospace;color:#79c0ff">poetry build</span><br>
+        <span style="color:#484f58">→ dist/ots_maptak-*.whl</span>
+      </div>
+    </div>
+    <div style="color:#30363d;font-size:20px">→</div>
+    <div style="text-align:center">
+      <div style="background:#1a2e1a;border:1px solid #2ea043;border-radius:6px;padding:8px 14px;font-size:11px;color:#3fb950;font-weight:600">Upload .whl<br>Plugin Manager</div>
+    </div>
+    <div style="color:#30363d;font-size:20px">→</div>
+    <div style="text-align:center">
+      <div style="background:#2d2a1a;border:1px solid #9e6a03;border-radius:6px;padding:8px 14px;font-size:11px;color:#e3b341;font-weight:600">Działa<br>na serwerze ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- BENEFITS -->
+<div class="benefit-row">
+  <div class="benefit">
+    <div class="benefit-icon">🔒</div>
+    <div class="benefit-name">Zero konfliktów</div>
+    <div class="benefit-desc">Bazowy OpenTAK UI nigdy nie jest modyfikowany</div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">📦</div>
+    <div class="benefit-name">Oficjalny system</div>
+    <div class="benefit-desc">Używa istniejącego Plugin Manager — upload .whl</div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">🔌</div>
+    <div class="benefit-name">Ten sam origin</div>
+    <div class="benefit-desc">socket.io i REST API bez CORS — auth przez ciasteczka</div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">🔄</div>
+    <div class="benefit-name">Niezależne aktualizacje</div>
+    <div class="benefit-desc">OpenTAK UI i plugin aktualizujesz osobno</div>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">✅</div>
+    <div class="benefit-name">Sprawdzony wzorzec</div>
+    <div class="benefit-desc">OTS-Plugin-Template — oficjalny szablon OpenTAK</div>
+  </div>
+</div>
+
+</body>
+</html>

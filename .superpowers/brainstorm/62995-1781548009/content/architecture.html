@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MapTAK Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  h2 { font-size: 18px; font-weight: 600; color: #f0f6fc; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #8b949e; margin-bottom: 20px; }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .layer {
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .layer-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .layer-body { padding: 10px 12px; }
+
+  .box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .box:last-child { margin-bottom: 0; }
+  .box .name { font-weight: 600; color: #f0f6fc; }
+  .box .desc { font-size: 11px; color: #8b949e; margin-top: 2px; }
+  .box .tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 10px;
+    margin-top: 3px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-react   { background: #1c2d40; color: #58a6ff; }
+  .tag-leaflet { background: #1a2e1a; color: #3fb950; }
+  .tag-socket  { background: #2d1a2e; color: #d2a8ff; }
+  .tag-state   { background: #2d2a1a; color: #e3b341; }
+  .tag-new     { background: #1a2e1a; color: #56d364; border: 1px solid #2ea043; }
+  .tag-fix     { background: #2d1a1a; color: #f85149; border: 1px solid #da3633; }
+
+  /* Data flow arrow */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 11px;
+    color: #8b949e;
+  }
+  .flow-arrow { color: #58a6ff; font-size: 16px; flex-shrink: 0; }
+  .flow-label { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 3px 8px; font-size: 11px; white-space: nowrap; }
+
+  /* Problems vs fixes */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .compare-col { border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+  .compare-header { padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .item { padding: 6px 12px; border-top: 1px solid #21262d; font-size: 12px; display: flex; align-items: flex-start; gap: 8px; }
+  .item-icon { flex-shrink: 0; font-size: 13px; }
+
+  /* State flow */
+  .flow-diagram {
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 0;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .flow-node {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #f0f6fc;
+    white-space: nowrap;
+  }
+  .flow-node.highlight { border-color: #58a6ff; color: #58a6ff; }
+  .flow-node.green { border-color: #3fb950; color: #3fb950; }
+  .flow-node.purple { border-color: #d2a8ff; color: #d2a8ff; }
+  .flow-node.yellow { border-color: #e3b341; color: #e3b341; }
+  .arr { color: #30363d; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<h2>MapTAK — Architektura techniczna</h2>
+<p class="subtitle">React 19 + react-leaflet 5 + socket.io · zastępuje istniejący Map.tsx w OpenTAK UI 1.7.5</p>
+
+<!-- PROBLEMS vs FIXES -->
+<div class="compare" style="margin-bottom:16px">
+  <div class="compare-col">
+    <div class="compare-header" style="background:#1a0d0d; color:#f85149">🔴 Obecne problemy w Map.tsx</div>
+    <div class="item"><span class="item-icon">⚡</span><span>Mutacja stanu bez setState — markery nie re-renderują</span></div>
+    <div class="item"><span class="item-icon">📦</span><span>Warstwy L.LayerGroup tworzone poza hookami Reacta</span></div>
+    <div class="item"><span class="item-icon">🗺</span><span>Brak śladów ruchu EUD</span></div>
+    <div class="item"><span class="item-icon">📋</span><span>Misje i shapes CoT nie renderują się na mapie</span></div>
+    <div class="item"><span class="item-icon">🔄</span><span>Jeden ogromny komponent — trudny w utrzymaniu</span></div>
+  </div>
+  <div class="compare-col">
+    <div class="compare-header" style="background:#0d1a0d; color:#3fb950">🟢 Rozwiązania w MapTAK</div>
+    <div class="item"><span class="item-icon">✅</span><span>Zustand store — reaktywny stan dla markerów i warstw</span></div>
+    <div class="item"><span class="item-icon">✅</span><span>useRef + useEffect z czystymi listenerami Leaflet</span></div>
+    <div class="item"><span class="item-icon">✅</span><span>Ślady z gradientem — deque ostatnich N punktów na unit</span></div>
+    <div class="item"><span class="item-icon">✅</span><span>CoT shapes renderer — Polygon/Polyline z misji API</span></div>
+    <div class="item"><span class="item-icon">✅</span><span>7 małych, testowalnych komponentów</span></div>
+  </div>
+</div>
+
+<!-- COMPONENT LAYERS -->
+<div class="arch-grid">
+
+  <!-- Layer 1: UI Components -->
+  <div class="layer">
+    <div class="layer-header" style="background:#1c2d40; color:#58a6ff">Warstwa UI (React)</div>
+    <div class="layer-body">
+      <div class="box">
+        <div class="name">MapTAK.tsx</div>
+        <div class="desc">Root — layout 3-panelowy, stan globalny</div>
+        <span class="tag tag-react">React</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">UnitSidebar.tsx</div>
+        <div class="desc">Lista EUD + misji, filtrowanie, search</div>
+        <span class="tag tag-react">React</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">UnitDetailPanel.tsx</div>
+        <div class="desc">Prawy panel — szczegóły, historia, akcje</div>
+        <span class="tag tag-react">React</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">LayerControl.tsx</div>
+        <div class="desc">Przełącznik warstw kafelków + overlays</div>
+        <span class="tag tag-react">React</span> <span class="tag tag-fix">REFACTOR</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 2: Map Core -->
+  <div class="layer">
+    <div class="layer-header" style="background:#1a2e1a; color:#3fb950">Rdzeń Mapy (Leaflet)</div>
+    <div class="layer-body">
+      <div class="box">
+        <div class="name">MapCore.tsx</div>
+        <div class="desc">MapContainer + useMap hook, inicjalizacja warstw</div>
+        <span class="tag tag-leaflet">Leaflet</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">EudLayer.tsx</div>
+        <div class="desc">Markery EUD (MIL-2525C) + rotacja + slideTo</div>
+        <span class="tag tag-leaflet">react-leaflet</span> <span class="tag tag-fix">REFACTOR</span>
+      </div>
+      <div class="box">
+        <div class="name">TrackLayer.tsx</div>
+        <div class="desc">Ślady gradientowe — Polyline Decorator, ostatnie 50 pkt</div>
+        <span class="tag tag-leaflet">Leaflet</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">ShapeLayer.tsx</div>
+        <div class="desc">Strefy CoT, polygony, linie misji</div>
+        <span class="tag tag-leaflet">Leaflet</span> <span class="tag tag-new">NOWY</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 3: Data -->
+  <div class="layer">
+    <div class="layer-header" style="background:#2d2a1a; color:#e3b341">Dane i Transport</div>
+    <div class="layer-body">
+      <div class="box">
+        <div class="name">useMapStore.ts</div>
+        <div class="desc">Zustand — euds, tracks, shapes, missions, selected</div>
+        <span class="tag tag-state">Zustand</span> <span class="tag tag-new">NOWY</span>
+      </div>
+      <div class="box">
+        <div class="name">useSocketEvents.ts</div>
+        <div class="desc">socket.on(point|eud|marker|rb_line) → store actions</div>
+        <span class="tag tag-socket">socket.io</span> <span class="tag tag-fix">REFACTOR</span>
+      </div>
+      <div class="box">
+        <div class="name">useMapState.ts</div>
+        <div class="desc">REST /api/map_state — bootstrap przy mount</div>
+        <span class="tag tag-state">axios</span> <span class="tag tag-fix">REFACTOR</span>
+      </div>
+      <div class="box">
+        <div class="name">useMissions.ts</div>
+        <div class="desc">REST /api/missions → shapes + waypoints na mapę</div>
+        <span class="tag tag-state">axios</span> <span class="tag tag-new">NOWY</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DATA FLOW -->
+<div class="flow-diagram">
+  <div style="font-size:11px;font-weight:700;color:#8b949e;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:12px">Przepływ danych (real-time)</div>
+  <div class="flow-row">
+    <div class="flow-node purple">OpenTAK Server</div>
+    <div class="arr">→</div>
+    <div class="flow-node purple">socket.io event<br><span style="font-size:9px;opacity:0.7">point / eud / marker</span></div>
+    <div class="arr">→</div>
+    <div class="flow-node yellow">useSocketEvents.ts<br><span style="font-size:9px;opacity:0.7">parses CoT payload</span></div>
+    <div class="arr">→</div>
+    <div class="flow-node yellow">useMapStore<br><span style="font-size:9px;opacity:0.7">Zustand setState</span></div>
+    <div class="arr">→</div>
+    <div class="flow-node green">EudLayer<br><span style="font-size:9px;opacity:0.7">marker.slideTo()</span></div>
+    <div class="arr">+</div>
+    <div class="flow-node green">TrackLayer<br><span style="font-size:9px;opacity:0.7">gradient polyline</span></div>
+  </div>
+  <div class="flow-row" style="margin-top:4px">
+    <div class="flow-node highlight">OpenTAK API</div>
+    <div class="arr">→</div>
+    <div class="flow-node highlight">/api/map_state<br><span style="font-size:9px;opacity:0.7">bootstrap (REST)</span></div>
+    <div class="arr">→</div>
+    <div class="flow-node yellow">useMapState.ts</div>
+    <div class="arr">→</div>
+    <div class="flow-node yellow">useMapStore<br><span style="font-size:9px;opacity:0.7">hydrate on mount</span></div>
+    <div class="arr">→</div>
+    <div class="flow-node green">Wszystkie warstwy</div>
+  </div>
+</div>
+
+</body>
+</html>

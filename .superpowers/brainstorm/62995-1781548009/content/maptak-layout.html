@@ -1,0 +1,178 @@
+<h2>MapTAK — projekt interfejsu</h2>
+<p class="subtitle">Nowy komponent zastępujący Map.tsx w OpenTAK UI 1.7.5 (React 19 + react-leaflet 5)</p>
+
+<div class="mockup" style="max-width:900px;margin:0 auto">
+  <div class="mockup-header">MapTAK — widok główny (1440px)</div>
+  <div class="mockup-body" style="padding:0;display:flex;height:520px;background:#1a1a2e;position:relative">
+
+    <!-- LEFT SIDEBAR -->
+    <div style="width:240px;background:#16213e;border-right:1px solid #0f3460;display:flex;flex-direction:column;z-index:100">
+      <div style="padding:8px 12px;background:#0f3460;font-size:11px;font-weight:700;color:#e94560;letter-spacing:1px">JEDNOSTKI / MISJE</div>
+
+      <!-- Filter bar -->
+      <div style="padding:6px 8px;background:#0d1b2a">
+        <div class="mock-input" style="font-size:10px;padding:4px 8px;background:#0f3460;border:1px solid #1a4a8a;color:#a0c4ff">🔍 Szukaj callsign...</div>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          <span style="background:#e94560;color:white;font-size:9px;padding:2px 6px;border-radius:10px;cursor:pointer">EUD</span>
+          <span style="background:#2a5a2a;color:#7fff7f;font-size:9px;padding:2px 6px;border-radius:10px;cursor:pointer">Misje</span>
+          <span style="background:#4a3a00;color:#ffd700;font-size:9px;padding:2px 6px;border-radius:10px;cursor:pointer">Kształty</span>
+        </div>
+      </div>
+
+      <!-- Unit list -->
+      <div style="overflow-y:auto;flex:1">
+        <div style="padding:6px 12px;border-bottom:1px solid #0f3460;cursor:pointer;background:#1a2744">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00ff88"></div>
+            <span style="color:#e0e0e0;font-size:11px;font-weight:600">ALPHA-1</span>
+          </div>
+          <div style="color:#888;font-size:9px;padding-left:14px">SFGP — 52.23°N, 21.01°E</div>
+          <div style="color:#555;font-size:9px;padding-left:14px">12s temu · 34 km/h</div>
+        </div>
+        <div style="padding:6px 12px;border-bottom:1px solid #0f3460;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00ff88"></div>
+            <span style="color:#e0e0e0;font-size:11px;font-weight:600">BRAVO-2</span>
+          </div>
+          <div style="color:#888;font-size:9px;padding-left:14px">SFGP — 52.18°N, 20.94°E</div>
+          <div style="color:#555;font-size:9px;padding-left:14px">5s temu · 0 km/h</div>
+        </div>
+        <div style="padding:6px 12px;border-bottom:1px solid #0f3460;cursor:pointer">
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ff4444"></div>
+            <span style="color:#888;font-size:11px">CHARLIE-3</span>
+          </div>
+          <div style="color:#555;font-size:9px;padding-left:14px">Rozłączony — 4 min temu</div>
+        </div>
+        <div style="padding:4px 12px;background:#0a1520;margin-top:4px">
+          <div style="color:#ffd700;font-size:10px;font-weight:600">📋 MISJA: ALFA-DAWN</div>
+        </div>
+        <div style="padding:4px 12px 4px 24px;border-bottom:1px solid #0a1520;cursor:pointer">
+          <div style="color:#a0c4ff;font-size:10px">📍 WP-01: Punkt zbiórki</div>
+        </div>
+        <div style="padding:4px 12px 4px 24px;border-bottom:1px solid #0a1520;cursor:pointer">
+          <div style="color:#a0c4ff;font-size:10px">⚠️ WP-02: Strefa ostrzeżeń</div>
+        </div>
+        <div style="padding:4px 12px 4px 24px;cursor:pointer">
+          <div style="color:#a0c4ff;font-size:10px">🚁 WP-03: LZ-Alpha</div>
+        </div>
+      </div>
+
+      <!-- Bottom stats -->
+      <div style="padding:6px 12px;background:#0f3460;font-size:10px;color:#888;border-top:1px solid #1a4a8a">
+        <span style="color:#00ff88">● 2</span> online &nbsp; <span style="color:#ff4444">● 1</span> offline &nbsp; <span style="color:#ffd700">● 3</span> elementy misji
+      </div>
+    </div>
+
+    <!-- MAP AREA -->
+    <div style="flex:1;background:#2d3561;position:relative;overflow:hidden">
+      <!-- Fake map tiles -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a2744 0%,#2d4a6e 50%,#1a3a5c 100%);opacity:0.7"></div>
+
+      <!-- Grid lines simulating map -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:0.15">
+        <line x1="0" y1="130" x2="660" y2="130" stroke="#4a90d9" stroke-width="0.5"/>
+        <line x1="0" y1="260" x2="660" y2="260" stroke="#4a90d9" stroke-width="0.5"/>
+        <line x1="0" y1="390" x2="660" y2="390" stroke="#4a90d9" stroke-width="0.5"/>
+        <line x1="165" y1="0" x2="165" y2="520" stroke="#4a90d9" stroke-width="0.5"/>
+        <line x1="330" y1="0" x2="330" y2="520" stroke="#4a90d9" stroke-width="0.5"/>
+        <line x1="495" y1="0" x2="495" y2="520" stroke="#4a90d9" stroke-width="0.5"/>
+      </svg>
+
+      <!-- Gradient track for ALPHA-1 -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%">
+        <polyline points="100,400 140,360 180,310 210,280 240,250" fill="none" stroke="rgba(0,255,136,0.2)" stroke-width="3"/>
+        <polyline points="140,360 180,310 210,280 240,250" fill="none" stroke="rgba(0,255,136,0.4)" stroke-width="3"/>
+        <polyline points="180,310 210,280 240,250" fill="none" stroke="rgba(0,255,136,0.7)" stroke-width="3"/>
+        <polyline points="210,280 240,250" fill="none" stroke="rgba(0,255,136,1)" stroke-width="3"/>
+      </svg>
+
+      <!-- Gradient track for BRAVO-2 -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%">
+        <polyline points="350,200 370,220 400,230 420,240" fill="none" stroke="rgba(0,200,255,0.2)" stroke-width="3"/>
+        <polyline points="370,220 400,230 420,240" fill="none" stroke="rgba(0,200,255,0.6)" stroke-width="3"/>
+        <polyline points="400,230 420,240" fill="none" stroke="rgba(0,200,255,1)" stroke-width="3"/>
+      </svg>
+
+      <!-- Danger zone polygon -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%">
+        <polygon points="300,150 400,120 450,200 370,240 290,210" fill="rgba(255,68,68,0.15)" stroke="rgba(255,68,68,0.7)" stroke-width="2" stroke-dasharray="6,3"/>
+        <text x="355" y="185" fill="rgba(255,100,100,0.9)" font-size="9" text-anchor="middle">⚠ STREFA OSTRZEŻEŃ</text>
+      </svg>
+
+      <!-- ALPHA-1 marker (current pos) -->
+      <div style="position:absolute;left:232px;top:242px;transform:translate(-50%,-50%)">
+        <div style="width:28px;height:28px;background:#00ff88;border:2px solid white;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;box-shadow:0 0 8px rgba(0,255,136,0.8)">A1</div>
+        <div style="background:rgba(0,0,0,0.7);color:#00ff88;font-size:9px;padding:1px 4px;white-space:nowrap;margin-top:2px;border-radius:2px;text-align:center">ALPHA-1</div>
+      </div>
+
+      <!-- BRAVO-2 marker -->
+      <div style="position:absolute;left:412px;top:232px;transform:translate(-50%,-50%)">
+        <div style="width:28px;height:28px;background:#00c8ff;border:2px solid white;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;box-shadow:0 0 8px rgba(0,200,255,0.8)">B2</div>
+        <div style="background:rgba(0,0,0,0.7);color:#00c8ff;font-size:9px;padding:1px 4px;white-space:nowrap;margin-top:2px;border-radius:2px;text-align:center">BRAVO-2</div>
+      </div>
+
+      <!-- Mission waypoints -->
+      <div style="position:absolute;left:180px;top:320px;transform:translate(-50%,-50%)">
+        <div style="width:16px;height:16px;background:#ffd700;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#000">1</div>
+      </div>
+      <div style="position:absolute;left:350px;top:180px;transform:translate(-50%,-50%)">
+        <div style="width:16px;height:16px;background:#ff6b00;border-radius:50%;border:2px solid white;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#000">2</div>
+      </div>
+
+      <!-- Controls top-right -->
+      <div style="position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px">
+        <div style="background:rgba(15,52,96,0.9);border:1px solid #1a4a8a;border-radius:4px;padding:4px 8px;font-size:9px;color:#a0c4ff;cursor:pointer">🗺 Warstwy</div>
+        <div style="background:rgba(15,52,96,0.9);border:1px solid #1a4a8a;border-radius:4px;padding:4px 8px;font-size:9px;color:#a0c4ff;cursor:pointer">👁 Filtr</div>
+        <div style="background:rgba(15,52,96,0.9);border:1px solid #1a4a8a;border-radius:4px;padding:4px 8px;font-size:9px;color:#a0c4ff;cursor:pointer">⛶ Pełny ekran</div>
+      </div>
+
+      <!-- Scale bottom-left -->
+      <div style="position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.5);padding:3px 8px;font-size:9px;color:#888;border-radius:2px">
+        Scale 1:50000 &nbsp;|&nbsp; 52.2°N 21.0°E
+      </div>
+
+      <!-- Live indicator -->
+      <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);padding:4px 10px;border-radius:12px;display:flex;align-items:center;gap:6px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#00ff88;animation:pulse 1.5s infinite"></div>
+        <span style="font-size:10px;color:#00ff88;font-weight:600">LIVE</span>
+      </div>
+    </div>
+
+    <!-- RIGHT DETAIL PANEL (popup state) -->
+    <div style="width:220px;background:#16213e;border-left:1px solid #0f3460;display:flex;flex-direction:column">
+      <div style="padding:8px 12px;background:#0f3460;font-size:11px;font-weight:700;color:#00ff88">ALPHA-1</div>
+      <div style="padding:8px 12px;font-size:10px;color:#888;overflow-y:auto;flex:1">
+        <div style="color:#a0c4ff;font-size:10px;font-weight:600;margin-bottom:4px">POZYCJA</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-bottom:8px">
+          <span style="color:#555">Lat</span><span style="color:#e0e0e0">52.2297°</span>
+          <span style="color:#555">Lon</span><span style="color:#e0e0e0">21.0122°</span>
+          <span style="color:#555">Alt</span><span style="color:#e0e0e0">112 m</span>
+          <span style="color:#555">Speed</span><span style="color:#e0e0e0">34 km/h</span>
+          <span style="color:#555">Course</span><span style="color:#e0e0e0">047°</span>
+        </div>
+        <div style="color:#a0c4ff;font-size:10px;font-weight:600;margin-bottom:4px">SZCZEGÓŁY</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-bottom:8px">
+          <span style="color:#555">Status</span><span style="color:#00ff88">Online</span>
+          <span style="color:#555">Type</span><span style="color:#e0e0e0">SFGP</span>
+          <span style="color:#555">Team</span><span style="color:#ffd700">Cyan</span>
+          <span style="color:#555">Role</span><span style="color:#e0e0e0">Team Lead</span>
+        </div>
+        <div style="color:#a0c4ff;font-size:10px;font-weight:600;margin-bottom:4px">HISTORIA</div>
+        <div style="background:#0d1b2a;border-radius:4px;padding:4px;font-size:9px;color:#555">
+          <div>18:24:01 — ruch</div>
+          <div>18:23:44 — ruch</div>
+          <div>18:23:31 — zatrzymanie</div>
+          <div>18:22:10 — połączono</div>
+        </div>
+      </div>
+      <div style="padding:6px 8px;display:flex;gap:4px">
+        <div style="flex:1;background:#0f3460;color:#a0c4ff;font-size:9px;padding:4px;text-align:center;border-radius:3px;cursor:pointer">Centruj</div>
+        <div style="flex:1;background:#0f3460;color:#a0c4ff;font-size:9px;padding:4px;text-align:center;border-radius:3px;cursor:pointer">Śledź</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:12px;text-align:center">Panel lewy: lista jednostek/misji z filtrowaniem &nbsp;|&nbsp; Mapa: ślady z gradientem, strefy CoT, waypoints misji &nbsp;|&nbsp; Panel prawy: szczegóły wybranej jednostki</p>

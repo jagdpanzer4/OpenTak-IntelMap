@@ -1,0 +1,71 @@
+<h2>3 podejścia do naprawy mapy OpenTAK</h2>
+<p class="subtitle">React 19 + TypeScript + Leaflet 1.9 już zainstalowane w OpenTAK UI 1.7.5</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Napraw istniejący komponent mapy</h3>
+      <p>Rozszerz bieżący <code>MapView</code> w OpenTAK UI — dodaj WebSocket CoT, warstwy kafelków, ślady EUD, strefy. Minimalna ingerencja w codebase.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Zalety</h4><ul>
+          <li>Leaflet już zainstalowany</li>
+          <li>Łatwy PR / merge upstream</li>
+          <li>Mniejsze ryzyko regresji</li>
+        </ul></div>
+        <div class="cons"><h4>Wady</h4><ul>
+          <li>Ograniczony przez obecną architekturę</li>
+          <li>Brak WebGL / wektorowych kafelków</li>
+          <li>Leaflet 1.x starzeje się</li>
+        </ul></div>
+      </div>
+      <p style="margin-top:8px"><span class="label">Czas: 2–3 dni</span> &nbsp; <span class="label">Ryzyko: Niskie</span></p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>🔥 Nowy komponent MapTAK (plugin) — Leaflet + pełny CoT stack</h3>
+      <p>Zupełnie nowy komponent <code>MapTAK</code> jako oddzielny plugin/moduł React. Zastępuje stary widok mapy. Pełna integracja z OpenTAK API (WebSocket, REST) i CoT schema.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Zalety</h4><ul>
+          <li>Czysta architektura, w pełni testowalna</li>
+          <li>Leaflet + react-leaflet (już w repo)</li>
+          <li>Pełne: ślady, warstwy, strefy, ikony MIL</li>
+          <li>Offline tiles (MBTiles/XYZ local)</li>
+          <li>Łatwy swap w przyszłości na MapLibre</li>
+        </ul></div>
+        <div class="cons"><h4>Wady</h4><ul>
+          <li>Tygodniowy nakład pracy</li>
+          <li>Wymaga dobrej znajomości CoT API</li>
+        </ul></div>
+      </div>
+      <p style="margin-top:8px"><span class="label">Czas: 5–10 dni</span> &nbsp; <span class="label">Ryzyko: Średnie</span></p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Migracja do MapLibre GL + własna warstwa CoT</h3>
+      <p>Wymiana Leaflet → MapLibre GL JS (WebGL, wektorowe kafelki). Nowy plugin z pełnym stackiem: CoT WebSocket, klastry, 3D budynki, offline PMTiles.</p>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Zalety</h4><ul>
+          <li>Najlepsza wydajność (WebGL)</li>
+          <li>Wektorowe kafelki (offline PMTiles)</li>
+          <li>Skalowalność na tysiące jednostek</li>
+          <li>Profesjonalny wygląd (styl OpenMapTiles)</li>
+        </ul></div>
+        <div class="cons"><h4>Wady</h4><ul>
+          <li>Wymaga wymiany całej warstwy mapowej</li>
+          <li>react-map-gl lub maplibre-react nowa zależność</li>
+          <li>2–3 tygodnie solidnej roboty</li>
+        </ul></div>
+      </div>
+      <p style="margin-top:8px"><span class="label">Czas: 15–20 dni</span> &nbsp; <span class="label">Ryzyko: Wysokie</span></p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px">💡 Rekomendacja: <strong>Opcja B</strong> — korzysta z już zainstalowanego Leaflet, dostarcza pełne funkcje taktyczne i ma czystą architekturę gotową na przyszłą migrację do MapLibre.</p>
