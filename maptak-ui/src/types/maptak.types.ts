@@ -12,14 +12,16 @@ export interface EUDPoint {
 export interface EUD {
   uid: string
   callsign: string
+  device: string | null
+  os: string | null
+  platform: string | null
+  version: string | null
   last_status: 'Connected' | 'Disconnected'
   last_event_time: string | null
-  mil_std_2525c: string | null
   team: string | null
-  role: string | null
-  type: string | null
-  icon: { bitmap: string; shadow: string } | null
-  point: EUDPoint | null
+  team_color: string | null
+  team_role: string | null
+  username: string | null
 }
 
 export type ShapeType = 'rb_line' | 'polygon' | 'waypoint' | 'casevac'
@@ -49,29 +51,48 @@ export interface Mission {
 
 export type FilterType = 'all' | 'eud' | 'mission' | 'shape'
 
+export interface PluginConfig {
+  MAPTAK_DEFAULT_LAT: number
+  MAPTAK_DEFAULT_LON: number
+  MAPTAK_DEFAULT_ZOOM: number
+  MAPTAK_MAX_TRACK_POINTS: number
+  MAPTAK_TRACK_COLOR: string
+  MAPTAK_SHOW_OFFLINE_EUDS: boolean
+  MAPTAK_ONLY_ATAK_EUDS: boolean
+}
+
+export const DEFAULT_CONFIG: PluginConfig = {
+  MAPTAK_DEFAULT_LAT: 52.2297,
+  MAPTAK_DEFAULT_LON: 21.0122,
+  MAPTAK_DEFAULT_ZOOM: 6,
+  MAPTAK_MAX_TRACK_POINTS: 50,
+  MAPTAK_TRACK_COLOR: '#00ff88',
+  MAPTAK_SHOW_OFFLINE_EUDS: true,
+  MAPTAK_ONLY_ATAK_EUDS: true,
+}
+
 export interface MapStore {
-  // --- dane ---
-  euds:     Record<string, EUD>
-  /** max 50 punktów per uid, FIFO */
-  tracks:   Record<string, [number, number][]>
-  shapes:   Shape[]
+  euds: Record<string, EUD>
+  /** max MAPTAK_MAX_TRACK_POINTS per uid, FIFO */
+  tracks: Record<string, [number, number][]>
+  shapes: Shape[]
   missions: Mission[]
+  config: PluginConfig
 
-  // --- UI state ---
   selectedUid: string | null
-  followUid:   string | null
+  followUid: string | null
   filterQuery: string
-  filterType:  FilterType
+  filterType: FilterType
 
-  // --- actions ---
-  upsertEud:    (eud: EUD) => void
-  appendTrack:  (uid: string, point: [number, number]) => void
-  upsertShape:  (shape: Shape) => void
-  setMissions:  (missions: Mission[]) => void
-  selectUnit:   (uid: string | null) => void
+  upsertEud: (eud: EUD) => void
+  appendTrack: (uid: string, point: [number, number]) => void
+  upsertShape: (shape: Shape) => void
+  setMissions: (missions: Mission[]) => void
+  setConfig: (cfg: Partial<PluginConfig>) => void
+  selectUnit: (uid: string | null) => void
   setFollowUid: (uid: string | null) => void
   setFilterQuery: (q: string) => void
-  setFilterType:  (t: FilterType) => void
+  setFilterType: (t: FilterType) => void
   hydrate: (data: {
     euds: EUD[]
     markers: unknown[]

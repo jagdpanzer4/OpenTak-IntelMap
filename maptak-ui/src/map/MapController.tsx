@@ -6,28 +6,29 @@ import { useMapStore } from '../hooks/useMapStore'
 export default function MapController() {
   const map      = useMap()
   const euds     = useMapStore((s) => s.euds)
+  const tracks   = useMapStore((s) => s.tracks)
   const followUid = useMapStore((s) => s.followUid)
 
   // Centrowanie przez CustomEvent z UnitDetailPanel
   useEffect(() => {
     const handler = (e: CustomEvent<{ uid: string }>) => {
-      const eud = euds[e.detail.uid]
-      if (eud?.point?.latitude != null && eud?.point?.longitude != null) {
-        map.flyTo([eud.point.latitude, eud.point.longitude], 14)
+      const lastPt = tracks[e.detail.uid]?.at(-1)
+      if (lastPt != null) {
+        map.flyTo(lastPt, 14)
       }
     }
     window.addEventListener('maptak:flyto', handler as EventListener)
     return () => window.removeEventListener('maptak:flyto', handler as EventListener)
-  }, [map, euds])
+  }, [map, tracks])
 
   // Auto-follow wybranej jednostki
   useEffect(() => {
     if (!followUid) return
-    const eud = euds[followUid]
-    if (eud?.point?.latitude != null && eud?.point?.longitude != null) {
-      map.panTo([eud.point.latitude, eud.point.longitude])
+    const lastPt = tracks[followUid]?.at(-1)
+    if (lastPt != null) {
+      map.panTo(lastPt)
     }
-  }, [map, euds, followUid])
+  }, [map, tracks, followUid])
 
   return null
 }

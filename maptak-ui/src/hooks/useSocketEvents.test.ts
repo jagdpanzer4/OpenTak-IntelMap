@@ -3,10 +3,12 @@ import { renderHook } from '@testing-library/react'
 import { useSocketEvents } from './useSocketEvents'
 import { useMapStore } from './useMapStore'
 import { socket } from '../socket'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
 
 beforeEach(() => {
   useMapStore.setState({
     euds: {}, tracks: {}, shapes: [], missions: [],
+    config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null, filterQuery: '', filterType: 'all',
   })
   vi.clearAllMocks()

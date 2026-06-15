@@ -2,18 +2,21 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import UnitDetailPanel from './UnitDetailPanel'
 import { useMapStore } from '../hooks/useMapStore'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
 
 const eud = {
   uid: 'x1', callsign: 'XRAY', last_status: 'Connected' as const,
-  last_event_time: null, mil_std_2525c: null,
-  team: 'Cyan', role: 'TL', type: 'SFGP', icon: null,
-  point: { latitude: 52.2297, longitude: 21.0122, altitude: 112,
-           speed: 34, course: 47, azimuth: null, fov: null, timestamp: null },
+  last_event_time: null,
+  device: 'ATAK', os: '35', platform: 'SFGP',
+  version: null, team: 'Cyan', team_color: 'Cyan', team_role: 'TL', username: 'john',
 }
 
 beforeEach(() => {
   useMapStore.setState({
-    euds: { x1: eud }, tracks: {}, shapes: [], missions: [],
+    euds: { x1: eud },
+    tracks: { x1: [[52.2297, 21.0122]] },
+    shapes: [], missions: [],
+    config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null, filterQuery: '', filterType: 'all',
   })
 })

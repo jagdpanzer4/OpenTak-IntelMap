@@ -14,7 +14,10 @@ export function useSocketEvents() {
     const onEud = (eud: EUD) => upsertEud(eud)
 
     const onPoint = (pt: any) => {
+      // Only add GPS-originated points to tracks (how starts with 'm-')
+      // Skip human-placed marker points (how = 'h-e', 'h-g-i-g-o', etc.)
       if (!pt?.device_uid || pt?.latitude == null || pt?.longitude == null) return
+      if (!pt?.how?.startsWith('m-')) return
       appendTrack(pt.device_uid, [pt.latitude, pt.longitude])
     }
 

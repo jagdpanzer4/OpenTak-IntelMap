@@ -2,10 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from '@testing-library/react'
 import ShapeLayer from './ShapeLayer'
 import { useMapStore } from '../hooks/useMapStore'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
 import L from 'leaflet'
 
 beforeEach(() => {
   useMapStore.setState({ euds: {}, tracks: {}, shapes: [], missions: [],
+    config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null, filterQuery: '', filterType: 'all' })
   vi.clearAllMocks()
 })

@@ -1,23 +1,23 @@
 import { create } from 'zustand'
-import type { EUD, FilterType, MapStore, Mission, Shape } from '../types/maptak.types'
+import type { EUD, FilterType, MapStore, Mission, PluginConfig, Shape } from '../types/maptak.types'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
 
-const MAX_TRACK_PTS = 50
-const MAX_EUDS      = 500
+const MAX_EUDS = 500
 
 export const useMapStore = create<MapStore>((set, get) => ({
-  euds:     {},
-  tracks:   {},
-  shapes:   [],
+  euds: {},
+  tracks: {},
+  shapes: [],
   missions: [],
+  config: DEFAULT_CONFIG,
   selectedUid: null,
-  followUid:   null,
+  followUid: null,
   filterQuery: '',
-  filterType:  'all',
+  filterType: 'all',
 
   upsertEud: (eud: EUD) =>
     set((state) => {
       const euds = { ...state.euds, [eud.uid]: eud }
-      // LRU eviction powyżej limitu — usuwa najstarzej widziane
       const keys = Object.keys(euds)
       let tracks = state.tracks
       if (keys.length > MAX_EUDS) {
@@ -36,12 +36,15 @@ export const useMapStore = create<MapStore>((set, get) => ({
     }),
 
   appendTrack: (uid: string, point: [number, number]) =>
-    set((state) => ({
-      tracks: {
-        ...state.tracks,
-        [uid]: [...(state.tracks[uid] ?? []), point].slice(-MAX_TRACK_PTS),
-      },
-    })),
+    set((state) => {
+      const maxPts = state.config.MAPTAK_MAX_TRACK_POINTS
+      return {
+        tracks: {
+          ...state.tracks,
+          [uid]: [...(state.tracks[uid] ?? []), point].slice(-maxPts),
+        },
+      }
+    }),
 
   upsertShape: (shape: Shape) =>
     set((state) => ({
@@ -52,35 +55,42 @@ export const useMapStore = create<MapStore>((set, get) => ({
 
   setMissions: (missions: Mission[]) => set({ missions }),
 
-  selectUnit:     (uid) => set({ selectedUid: uid }),
-  setFollowUid:   (uid) => set({ followUid: uid }),
-  setFilterQuery: (q)   => set({ filterQuery: q }),
-  setFilterType:  (t: FilterType) => set({ filterType: t }),
+  setConfig: (cfg: Partial<PluginConfig>) =>
+    set((state) => ({ config: { ...state.config, ...cfg } })),
+
+  selectUnit: (uid) => set({ selectedUid: uid }),
+  setFollowUid: (uid) => set({ followUid: uid }),
+  setFilterQuery: (q) => set({ filterQuery: q }),
+  setFilterType: (t: FilterType) => set({ filterType: t }),
 
   hydrate: ({ euds, markers, rb_lines, casevacs }) => {
-    const { upsertEud, appendTrack, upsertShape } = get()
+    const { upsertEud, upsertShape } = get()
 
-    euds.forEach((eud) => {
-      upsertEud(eud)
-      if (eud.point?.latitude != null && eud.point?.longitude != null) {
-        appendTrack(eud.uid, [eud.point.latitude, eud.point.longitude])
-      }
-    })
+    // EUDs from map_state — last_point is always null, positions come from /api/point separately
+    euds.forEach((eud) => upsertEud(eud))
 
+    // Markers: { uid, callsign, point: { latitude, longitude }, mil_std_2525c, ... }
     ;(markers as any[]).forEach((m) => {
       if (!m?.uid || !m?.point?.latitude) return
       upsertShape({
-        uid: m.uid, name: m.callsign ?? m.uid, type: 'waypoint',
-        points: [[m.point.latitude, m.point.longitude]], meta: null,
+        uid: m.uid,
+        name: m.callsign ?? m.uid,
+        type: 'waypoint',
+        points: [[m.point.latitude, m.point.longitude]],
+        meta: m.mil_std_2525c ?? null,
       })
     })
 
     ;(rb_lines as any[]).forEach((rb) => {
       if (!rb?.uid || !rb?.point1 || !rb?.point2) return
       upsertShape({
-        uid: rb.uid, name: rb.uid, type: 'rb_line',
-        points: [[rb.point1.latitude, rb.point1.longitude],
-                 [rb.point2.latitude, rb.point2.longitude]],
+        uid: rb.uid,
+        name: rb.uid,
+        type: 'rb_line',
+        points: [
+          [rb.point1.latitude, rb.point1.longitude],
+          [rb.point2.latitude, rb.point2.longitude],
+        ],
         meta: `${rb.bearing ?? ''}° / ${rb.distance ?? ''}m`,
       })
     })
@@ -88,8 +98,11 @@ export const useMapStore = create<MapStore>((set, get) => ({
     ;(casevacs as any[]).forEach((c) => {
       if (!c?.uid || !c?.point?.latitude) return
       upsertShape({
-        uid: c.uid, name: c.callsign ?? 'CASEVAC', type: 'casevac',
-        points: [[c.point.latitude, c.point.longitude]], meta: null,
+        uid: c.uid,
+        name: c.callsign ?? 'CASEVAC',
+        type: 'casevac',
+        points: [[c.point.latitude, c.point.longitude]],
+        meta: null,
       })
     })
   },

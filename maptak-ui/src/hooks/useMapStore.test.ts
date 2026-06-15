@@ -1,10 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useMapStore } from './useMapStore'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
+
+const baseEud = {
+  uid: 'test-1', callsign: 'ALPHA', last_status: 'Connected' as const,
+  last_event_time: null, device: 'ATAK', os: '35', platform: 'ATAK-CIV',
+  version: null, team: null, team_color: null, team_role: null, username: null,
+}
 
 // Reset store przed każdym testem
 beforeEach(() => {
   useMapStore.setState({
     euds: {}, tracks: {}, shapes: [], missions: [],
+    config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null,
     filterQuery: '', filterType: 'all',
   })
@@ -12,19 +20,13 @@ beforeEach(() => {
 
 describe('upsertEud', () => {
   it('dodaje nową jednostkę', () => {
-    const eud = { uid: 'test-1', callsign: 'ALPHA', last_status: 'Connected' as const,
-      last_event_time: null, mil_std_2525c: null, team: null, role: null,
-      type: null, icon: null, point: null }
-    useMapStore.getState().upsertEud(eud)
-    expect(useMapStore.getState().euds['test-1']).toEqual(eud)
+    useMapStore.getState().upsertEud(baseEud)
+    expect(useMapStore.getState().euds['test-1']).toEqual(baseEud)
   })
 
   it('nadpisuje istniejącą jednostkę', () => {
-    const base = { uid: 'test-1', callsign: 'ALPHA', last_status: 'Connected' as const,
-      last_event_time: null, mil_std_2525c: null, team: null, role: null,
-      type: null, icon: null, point: null }
-    useMapStore.getState().upsertEud(base)
-    useMapStore.getState().upsertEud({ ...base, callsign: 'ALPHA-UPDATED' })
+    useMapStore.getState().upsertEud(baseEud)
+    useMapStore.getState().upsertEud({ ...baseEud, callsign: 'ALPHA-UPDATED' })
     expect(useMapStore.getState().euds['test-1'].callsign).toBe('ALPHA-UPDATED')
   })
 })
@@ -78,14 +80,13 @@ describe('selectUnit', () => {
 })
 
 describe('hydrate', () => {
-  it('ładuje EUD z /api/map_state', () => {
+  it('ładuje EUD z /api/map_state (bez pozycji — pozycje z /api/point)', () => {
     const eud = { uid: 'h-1', callsign: 'HOTEL', last_status: 'Connected' as const,
-      last_event_time: null, mil_std_2525c: null, team: null, role: null,
-      type: null, icon: null,
-      point: { latitude: 52, longitude: 21, altitude: null, speed: null,
-               course: null, azimuth: null, fov: null, timestamp: null } }
+      last_event_time: null, device: 'ATAK', os: '35', platform: 'ATAK-CIV',
+      version: null, team: null, team_color: null, team_role: null, username: null }
     useMapStore.getState().hydrate({ euds: [eud], markers: [], rb_lines: [], casevacs: [] })
     expect(useMapStore.getState().euds['h-1'].callsign).toBe('HOTEL')
-    expect(useMapStore.getState().tracks['h-1']).toEqual([[52, 21]])
+    // tracks not seeded by hydrate — come from /api/point
+    expect(useMapStore.getState().tracks['h-1']).toBeUndefined()
   })
 })

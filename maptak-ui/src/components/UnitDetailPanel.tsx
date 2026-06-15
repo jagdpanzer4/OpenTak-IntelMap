@@ -3,6 +3,7 @@ import styles from './UnitDetailPanel.module.css'
 
 export default function UnitDetailPanel() {
   const euds        = useMapStore((s) => s.euds)
+  const tracks      = useMapStore((s) => s.tracks)
   const selectedUid = useMapStore((s) => s.selectedUid)
   const followUid   = useMapStore((s) => s.followUid)
   const selectUnit  = useMapStore((s) => s.selectUnit)
@@ -12,6 +13,7 @@ export default function UnitDetailPanel() {
   if (!eud) return null
 
   const online = eud.last_status === 'Connected'
+  const lastPt = selectedUid ? tracks[selectedUid]?.at(-1) : undefined
 
   return (
     <aside className={styles.panel}>
@@ -26,21 +28,9 @@ export default function UnitDetailPanel() {
           <div className={styles.sectionLabel}>Pozycja</div>
           <dl className={styles.grid}>
             <dt className={styles.label}>Lat</dt>
-            <dd className={styles.value}>{eud.point?.latitude?.toFixed(6) ?? '—'}°</dd>
+            <dd className={styles.value}>{lastPt != null ? `${lastPt[0].toFixed(6)}°` : '—'}</dd>
             <dt className={styles.label}>Lon</dt>
-            <dd className={styles.value}>{eud.point?.longitude?.toFixed(6) ?? '—'}°</dd>
-            <dt className={styles.label}>Alt</dt>
-            <dd className={styles.value}>
-              {eud.point?.altitude != null ? `${eud.point.altitude} m` : '—'}
-            </dd>
-            <dt className={styles.label}>Speed</dt>
-            <dd className={styles.value}>
-              {eud.point?.speed != null ? `${eud.point.speed.toFixed(1)} km/h` : '—'}
-            </dd>
-            <dt className={styles.label}>Course</dt>
-            <dd className={styles.value}>
-              {eud.point?.course != null ? `${eud.point.course}°` : '—'}
-            </dd>
+            <dd className={styles.value}>{lastPt != null ? `${lastPt[1].toFixed(6)}°` : '—'}</dd>
           </dl>
         </div>
 
@@ -51,12 +41,14 @@ export default function UnitDetailPanel() {
             <dd className={styles.value} style={{ color: online ? '#00ff88' : '#ff4444' }}>
               {eud.last_status}
             </dd>
-            <dt className={styles.label}>Typ</dt>
-            <dd className={styles.value}>{eud.type ?? '—'}</dd>
+            <dt className={styles.label}>Platform</dt>
+            <dd className={styles.value}>{eud.platform ?? '—'}</dd>
             <dt className={styles.label}>Team</dt>
             <dd className={styles.value}>{eud.team ?? '—'}</dd>
-            <dt className={styles.label}>Rola</dt>
-            <dd className={styles.value}>{eud.role ?? '—'}</dd>
+            <dt className={styles.label}>Role</dt>
+            <dd className={styles.value}>{eud.team_role ?? '—'}</dd>
+            <dt className={styles.label}>User</dt>
+            <dd className={styles.value}>{eud.username ?? '—'}</dd>
           </dl>
         </div>
       </div>

@@ -2,24 +2,26 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import UnitSidebar from './UnitSidebar'
 import { useMapStore } from '../hooks/useMapStore'
+import { DEFAULT_CONFIG } from '../types/maptak.types'
 
 const eudOnline = {
   uid: 'a1', callsign: 'ALPHA', last_status: 'Connected' as const,
-  last_event_time: '2026-06-15T20:00:00', mil_std_2525c: null,
-  team: null, role: null, type: null, icon: null,
-  point: { latitude: 52, longitude: 21, altitude: null,
-           speed: null, course: null, azimuth: null, fov: null, timestamp: null },
+  last_event_time: '2026-06-15T20:00:00',
+  device: 'ATAK', os: '35', platform: 'ATAK-CIV',
+  version: null, team: null, team_color: null, team_role: null, username: null,
 }
 
 const eudOffline = {
   uid: 'b2', callsign: 'BRAVO', last_status: 'Disconnected' as const,
-  last_event_time: '2026-06-15T19:00:00', mil_std_2525c: null,
-  team: null, role: null, type: null, icon: null, point: null,
+  last_event_time: '2026-06-15T19:00:00',
+  device: 'ATAK', os: '35', platform: 'ATAK-CIV',
+  version: null, team: null, team_color: null, team_role: null, username: null,
 }
 
 beforeEach(() => {
   useMapStore.setState({
     euds: { a1: eudOnline, b2: eudOffline }, tracks: {}, shapes: [], missions: [],
+    config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null, filterQuery: '', filterType: 'all',
   })
 })

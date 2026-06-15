@@ -12,20 +12,21 @@ export default function UnitSidebar() {
   const selectUnit   = useMapStore((s) => s.selectUnit)
   const setFilterQuery = useMapStore((s) => s.setFilterQuery)
   const setFilterType  = useMapStore((s) => s.setFilterType)
+  const config       = useMapStore((s) => s.config)
 
   const eudList = useMemo(() => {
     return Object.values(euds)
-      .filter((e) =>
-        !filterQuery ||
-        e.callsign.toLowerCase().includes(filterQuery.toLowerCase()),
-      )
+      .filter((e) => {
+        if (config.MAPTAK_ONLY_ATAK_EUDS && (!e.device || !e.os || !e.platform)) return false
+        if (!config.MAPTAK_SHOW_OFFLINE_EUDS && e.last_status !== 'Connected') return false
+        if (filterQuery && !e.callsign.toLowerCase().includes(filterQuery.toLowerCase())) return false
+        return true
+      })
       .sort((a, b) => {
-        if (a.last_status !== b.last_status) {
-          return a.last_status === 'Connected' ? -1 : 1
-        }
+        if (a.last_status !== b.last_status) return a.last_status === 'Connected' ? -1 : 1
         return (b.last_event_time ?? '').localeCompare(a.last_event_time ?? '')
       })
-  }, [euds, filterQuery])
+  }, [euds, filterQuery, config])
 
   const onlineCount  = Object.values(euds).filter((e) => e.last_status === 'Connected').length
   const offlineCount = Object.values(euds).length - onlineCount
@@ -90,7 +91,7 @@ function EudRow({ eud, selected, onSelect }: {
       <span className={`${styles.dot} ${online ? styles.dotOnline : styles.dotOffline}`} />
       <div>
         <div className={styles.callsign}>{eud.callsign}</div>
-        <div className={styles.meta}>{eud.type ?? '—'}</div>
+        <div className={styles.meta}>{eud.team_role ?? '—'}</div>
       </div>
     </li>
   )

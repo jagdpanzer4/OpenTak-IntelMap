@@ -3,6 +3,14 @@ import yaml
 
 
 class DefaultConfig:
+    MAPTAK_DEFAULT_LAT = 52.2297      # Default map center latitude (Warsaw)
+    MAPTAK_DEFAULT_LON = 21.0122      # Default map center longitude
+    MAPTAK_DEFAULT_ZOOM = 6           # Default zoom level (1-20)
+    MAPTAK_MAX_TRACK_POINTS = 50      # Max GPS history points per EUD
+    MAPTAK_TRACK_COLOR = '#00ff88'    # Track polyline color (CSS hex)
+    MAPTAK_SHOW_OFFLINE_EUDS = True   # Show disconnected EUDs in sidebar
+    MAPTAK_ONLY_ATAK_EUDS = True      # Only show EUDs with device/os/platform set
+
     @staticmethod
     def update_config(new_config: dict, data_folder: str | None = None) -> dict:
         if data_folder is None:
