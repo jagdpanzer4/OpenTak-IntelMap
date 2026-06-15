@@ -6,6 +6,10 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 dynamic = ["version"]
 
+[project.urls]
+Homepage = "https://github.com/jagdpanzer4/OpenTak-IntelMap"
+Repository = "https://github.com/jagdpanzer4/OpenTak-IntelMap"
+
 [tool.poetry]
 include = [{path = "ots_maptak/ui/**/*", format = ["sdist", "wheel"]}]
 version = "0.0.0"

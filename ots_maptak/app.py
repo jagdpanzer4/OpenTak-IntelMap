@@ -22,8 +22,8 @@ class MapTAKPlugin(Plugin):
     url_prefix  = f'/api/plugins/{_PKG}'
     blueprint   = Blueprint('MapTAKPlugin', __name__, url_prefix=url_prefix)
 
-    def activate(self, flask_app: Flask):
-        self._app = flask_app
+    def activate(self, app: Flask, enabled: bool = True):
+        self._app = app
         self._load_config()
         self.load_metadata()
         try:
