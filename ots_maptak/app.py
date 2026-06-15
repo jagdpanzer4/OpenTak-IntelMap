@@ -32,6 +32,7 @@ class MapTAKPlugin(Plugin):
             logger.error(traceback.format_exc())
 
     def load_metadata(self):
+        self.name = _PKG  # fallback if metadata lookup fails
         try:
             self.distro   = _PKG
             self.metadata = importlib.metadata.metadata(_PKG).json
@@ -117,7 +118,8 @@ class MapTAKPlugin(Plugin):
     @blueprint.route('/config', methods=['POST'])
     def update_config():
         try:
-            result = DefaultConfig.update_config(request.json)
+            data_folder = app.config.get('OTS_DATA_FOLDER', os.environ.get('OTS_DATA_FOLDER', ''))
+            result = DefaultConfig.update_config(request.json, data_folder=data_folder or None)
             return (jsonify(result), 200) if result['success'] else (jsonify(result), 400)
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 400
