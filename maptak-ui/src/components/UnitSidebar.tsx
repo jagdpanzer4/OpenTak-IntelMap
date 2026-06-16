@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 import { useMapStore } from '../hooks/useMapStore'
-import type { EUD, FilterType, Mission } from '../types/maptak.types'
+import type { EUD, FilterType, Mission, Shape } from '../types/maptak.types'
 import styles from './UnitSidebar.module.css'
 
 export default function UnitSidebar() {
   const euds             = useMapStore((s) => s.euds)
+  const shapes           = useMapStore((s) => s.shapes)
   const missions         = useMapStore((s) => s.missions)
   const filterQuery      = useMapStore((s) => s.filterQuery)
   const filterType       = useMapStore((s) => s.filterType)
@@ -31,10 +32,9 @@ export default function UnitSidebar() {
   }, [euds, filterQuery, config])
 
   const onlineCount  = Object.values(euds).filter((e) => e.last_status === 'Connected').length
-  const offlineCount = Object.values(euds).length - onlineCount
 
   const FILTER_LABELS: Record<FilterType, string> = {
-    all: 'Wszystko', eud: 'EUD', mission: 'Misje', shape: 'Kształty',
+    all: 'Wszystko', eud: 'EUD', mission: 'Misje', shape: `Kształty (${shapes.length})`,
   }
 
   return (
@@ -80,12 +80,16 @@ export default function UnitSidebar() {
               onToggle={() => toggleMission(m.name)}
             />
           ))}
+        {(filterType === 'all' || filterType === 'shape') &&
+          shapes.map((s) => <ShapeRow key={s.uid} shape={s} />)}
       </ul>
 
       <div className={styles.footer}>
         <span className={styles.online}>● {onlineCount}</span> online
         {' '}
         <span className={styles.mission}>● {missions.length}</span> misje
+        {' '}
+        <span className={styles.shapeCount}>◆ {shapes.length}</span> kształty
         {selectedMissions.length > 0 && (
           <span
             className={styles.missionFilter}
@@ -131,6 +135,28 @@ function MissionRow({ mission, checked, onToggle }: {
       <div>
         <div className={styles.missionName}>{mission.name}</div>
         <div className={styles.meta}>{mission.uids.length} EUD</div>
+      </div>
+    </li>
+  )
+}
+
+const SHAPE_ICONS: Record<string, string> = {
+  waypoint: '📍', casevac: '🚑', rb_line: '📏', polygon: '⬡',
+}
+
+function ShapeRow({ shape }: { shape: Shape }) {
+  const icon = SHAPE_ICONS[shape.type] ?? '◆'
+  const typeLabel = shape.type === 'rb_line' ? 'RB Line'
+    : shape.type === 'casevac' ? 'CASEVAC'
+    : shape.type === 'waypoint' ? 'Marker'
+    : shape.type === 'polygon' ? 'Obszar'
+    : shape.type
+  return (
+    <li className={styles.shapeRow}>
+      <span className={styles.shapeIcon}>{icon}</span>
+      <div>
+        <div className={styles.callsign}>{shape.name}</div>
+        <div className={styles.meta}>{typeLabel}{shape.meta ? ` · ${shape.meta}` : ''}</div>
       </div>
     </li>
   )

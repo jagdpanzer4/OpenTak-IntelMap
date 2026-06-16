@@ -2,12 +2,21 @@ import { useEffect } from 'react'
 import { useMap } from 'react-leaflet'
 import { useMapStore } from '../hooks/useMapStore'
 
-/** Musi być wewnątrz <MapContainer>. Obsługuje flyTo i follow. */
+/** Musi być wewnątrz <MapContainer>. Obsługuje flyTo, follow i config-driven initial view. */
 export default function MapController() {
   const map      = useMap()
   const euds     = useMapStore((s) => s.euds)
   const tracks   = useMapStore((s) => s.tracks)
   const followUid = useMapStore((s) => s.followUid)
+
+  // Ustaw widok mapy gdy config zostanie załadowany z API
+  useEffect(() => {
+    const handler = (e: CustomEvent<{ lat: number; lon: number; zoom: number }>) => {
+      map.setView([e.detail.lat, e.detail.lon], e.detail.zoom, { animate: false })
+    }
+    window.addEventListener('maptak:configLoaded', handler as EventListener)
+    return () => window.removeEventListener('maptak:configLoaded', handler as EventListener)
+  }, [map])
 
   // Centrowanie przez CustomEvent z UnitDetailPanel
   useEffect(() => {

@@ -4,30 +4,86 @@ import { useMapStore } from './useMapStore'
 
 export function useMapState() {
   const hydrate      = useMapStore((s) => s.hydrate)
+  const upsertShape  = useMapStore((s) => s.upsertShape)
   const appendTrack  = useMapStore((s) => s.appendTrack)
   const setConfig    = useMapStore((s) => s.setConfig)
 
   useEffect(() => {
-    // Load plugin config from /api/plugins/ots_maptak/config
+    // 1. Load plugin config — fire event so MapController can setView
     axios
       .get('/api/plugins/ots_maptak/config')
-      .then((r) => { if (r.status === 200) setConfig(r.data) })
+      .then((r) => {
+        if (r.status === 200) {
+          setConfig(r.data)
+          window.dispatchEvent(new CustomEvent('maptak:configLoaded', {
+            detail: {
+              lat:  r.data.MAPTAK_DEFAULT_LAT,
+              lon:  r.data.MAPTAK_DEFAULT_LON,
+              zoom: r.data.MAPTAK_DEFAULT_ZOOM,
+            },
+          }))
+        }
+      })
       .catch(() => { /* use defaults */ })
 
-    // Load EUDs and shapes from map_state
+    // 2. Load EUDs from map_state (includes rb_lines with stale filter)
     axios
       .get('/api/map_state')
-      .then((r) => { if (r.status === 200) hydrate(r.data) })
+      .then((r) => {
+        if (r.status === 200) {
+          // Pass empty markers/casevacs — we load them separately without stale filter
+          hydrate({ euds: r.data.euds ?? [], markers: [], rb_lines: r.data.rb_lines ?? [], casevacs: [] })
+          console.debug('[MapTAK] map_state euds:', r.data.euds?.length, 'rb_lines:', r.data.rb_lines?.length)
+        }
+      })
       .catch((err) => console.error('[MapTAK] map_state error:', err))
 
-    // Seed initial track positions from recent GPS points
-    // Only machine-generated points (how starts with 'm-'), newest 500
+    // 3. Load ALL markers (no stale filter — /api/markers returns everything)
+    axios
+      .get('/api/markers?per_page=500')
+      .then((r) => {
+        if (r.status !== 200) return
+        const items: any[] = r.data.results ?? r.data ?? []
+        console.debug('[MapTAK] markers loaded:', items.length)
+        items.forEach((m) => {
+          if (!m?.uid || !m?.point?.latitude) return
+          upsertShape({
+            uid: m.uid,
+            name: m.callsign ?? m.uid,
+            type: 'waypoint',
+            points: [[m.point.latitude, m.point.longitude]],
+            meta: m.mil_std_2525c ?? null,
+          })
+        })
+      })
+      .catch((err) => console.error('[MapTAK] markers error:', err))
+
+    // 4. Load ALL casevacs (no stale filter)
+    axios
+      .get('/api/casevac?per_page=200')
+      .then((r) => {
+        if (r.status !== 200) return
+        const items: any[] = r.data.results ?? r.data ?? []
+        console.debug('[MapTAK] casevacs loaded:', items.length)
+        items.forEach((c) => {
+          if (!c?.uid || !c?.point?.latitude) return
+          upsertShape({
+            uid: c.uid,
+            name: c.sender_uid ?? 'CASEVAC',
+            type: 'casevac',
+            points: [[c.point.latitude, c.point.longitude]],
+            meta: null,
+          })
+        })
+      })
+      .catch((err) => console.error('[MapTAK] casevac error:', err))
+
+    // 5. Seed initial track positions from recent GPS points
     axios
       .get('/api/point?per_page=500&sort_by=timestamp&sort_direction=desc')
       .then((r) => {
         if (r.status !== 200) return
         const points: any[] = r.data.results ?? r.data ?? []
-        // Points come newest-first; collect per EUD then append oldest-first
         const byEud: Record<string, any[]> = {}
         points.forEach((pt) => {
           if (!pt?.device_uid || pt?.latitude == null || !pt?.how?.startsWith('m-')) return
@@ -35,12 +91,12 @@ export function useMapState() {
           byEud[pt.device_uid].push(pt)
         })
         Object.entries(byEud).forEach(([uid, pts]) => {
-          // pts are newest-first; reverse to append oldest-first
           pts.reverse().forEach((pt) => {
             appendTrack(uid, [pt.latitude, pt.longitude])
           })
         })
+        console.debug('[MapTAK] seeded tracks for', Object.keys(byEud).length, 'EUDs')
       })
       .catch((err) => console.error('[MapTAK] points seed error:', err))
-  }, [hydrate, appendTrack, setConfig])
+  }, [hydrate, upsertShape, appendTrack, setConfig])
 }
