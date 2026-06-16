@@ -463,6 +463,8 @@ class MapTAKPlugin(Plugin):
         from opentakserver.models.Marker import Marker
         try:
             uids = request.get_json(force=True).get('uids', [])
+            if not uids:
+                return jsonify({'deleted': []}), 200
             deleted = []
             for uid in uids:
                 m = ots_db.session.query(Marker).filter(Marker.uid == uid).first()
@@ -500,6 +502,8 @@ class MapTAKPlugin(Plugin):
         from opentakserver.models.CoT import CoT
         try:
             uids = request.get_json(force=True).get('uids', [])
+            if not uids:
+                return jsonify({'deleted': []}), 200
             deleted = []
             for uid in uids:
                 c = ots_db.session.query(CoT).filter(CoT.uid == uid).first()

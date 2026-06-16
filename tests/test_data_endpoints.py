@@ -2,7 +2,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from flask import Flask
-from types import SimpleNamespace
 import datetime
 
 
