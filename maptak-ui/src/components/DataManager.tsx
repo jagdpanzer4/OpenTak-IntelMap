@@ -62,7 +62,13 @@ export default function DataManager() {
     else if (activeTab === 'markers') url = `${API}/data/markers/${uid}`
     else if (cotType) url = `${API}/data/cot/${uid}`
     else return
-    await fetch(url, { method: 'DELETE' })
+    try {
+      const r = await fetch(url, { method: 'DELETE' })
+      if (!r.ok) throw new Error(`${r.status}`)
+    } catch (e) {
+      alert(`Usuwanie nie powiodło się: ${e instanceof Error ? e.message : 'błąd sieci'}`)
+      return
+    }
     fetchTab(activeTab, query, statusFilter)
   }, [activeTab, query, statusFilter, fetchTab])
 
@@ -76,7 +82,13 @@ export default function DataManager() {
     else if (activeTab === 'markers') url = `${API}/data/markers`
     else if (cotType) url = `${API}/data/cot`
     else return
-    await fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uids }) })
+    try {
+      const r = await fetch(url, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uids }) })
+      if (!r.ok) throw new Error(`${r.status}`)
+    } catch (e) {
+      alert(`Usuwanie nie powiodło się: ${e instanceof Error ? e.message : 'błąd sieci'}`)
+      return
+    }
     setSelected(new Set())
     fetchTab(activeTab, query, statusFilter)
   }, [activeTab, selected, query, statusFilter, fetchTab])
