@@ -117,3 +117,50 @@ export interface MapStore {
     casevacs: unknown[]
   }) => void
 }
+
+// ── Data Management ────────────────────────────────────────────────────────
+
+export interface DataEUD {
+  uid: string
+  callsign: string
+  team: string
+  team_role: string
+  platform: string
+  last_status: string
+  last_event_time: string | null
+}
+
+export interface DataMarker {
+  uid: string
+  callsign: string
+  type: string
+  latitude: number | null
+  longitude: number | null
+  timestamp: string | null
+}
+
+export interface DataCotItem {
+  uid: string
+  name: string
+  type: 'u-d-f' | 'b-m-r' | 'b-m-p-s-p-loc'
+  sender_uid: string
+  timestamp: string | null
+  color: string | null
+  point_count: number
+}
+
+export type DataTab = 'euds' | 'markers' | 'routes' | 'shapes' | 'spis'
+
+export const DATA_TAB_LABELS: Record<DataTab, string> = {
+  euds: 'EUD',
+  markers: 'Markery',
+  routes: 'Trasy',
+  shapes: 'Kształty',
+  spis: 'SPI',
+}
+
+export const DATA_TAB_COT_TYPE: Partial<Record<DataTab, string>> = {
+  routes: 'b-m-r',
+  shapes: 'u-d-f',
+  spis: 'b-m-p-s-p-loc',
+}
