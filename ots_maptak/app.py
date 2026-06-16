@@ -369,14 +369,14 @@ class MapTAKPlugin(Plugin):
     @roles_accepted('administrator')
     def data_cot():
         """List drawn shapes (routes, polygons, SPIs) by type filter."""
+        cot_type = request.args.get('type', 'u-d-f')
+        allowed = ['u-d-f', 'b-m-r', 'b-m-p-s-p-loc']
+        if cot_type not in allowed:
+            return jsonify({'error': 'invalid type'}), 400
         from opentakserver.extensions import db as ots_db
         from opentakserver.models.CoT import CoT
         try:
-            cot_type = request.args.get('type', 'u-d-f')
             q = request.args.get('q', '').lower()
-            allowed = ['u-d-f', 'b-m-r', 'b-m-p-s-p-loc']
-            if cot_type not in allowed:
-                return jsonify({'error': 'invalid type'}), 400
             query = ots_db.session.query(CoT).filter(CoT.type == cot_type)
             if q:
                 query = query.filter(CoT.uid.ilike(f'%{q}%'))
