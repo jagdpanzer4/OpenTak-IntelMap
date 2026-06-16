@@ -399,5 +399,118 @@ class MapTAKPlugin(Plugin):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+    @staticmethod
+    @blueprint.route('/data/euds/<uid>', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_eud(uid):
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.EUD import EUD
+        try:
+            eud = ots_db.session.query(EUD).filter(EUD.uid == uid).first()
+            if not eud:
+                return jsonify({'error': 'not found'}), 404
+            ots_db.session.delete(eud)
+            ots_db.session.commit()
+            return jsonify({'deleted': uid})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/euds', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_euds_bulk():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.EUD import EUD
+        try:
+            uids = request.get_json(force=True).get('uids', [])
+            if not uids:
+                return jsonify({'deleted': []}), 200
+            deleted = []
+            for uid in uids:
+                eud = ots_db.session.query(EUD).filter(EUD.uid == uid).first()
+                if eud:
+                    ots_db.session.delete(eud)
+                    deleted.append(uid)
+            ots_db.session.commit()
+            return jsonify({'deleted': deleted})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/markers/<uid>', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_marker(uid):
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.Marker import Marker
+        try:
+            marker = ots_db.session.query(Marker).filter(Marker.uid == uid).first()
+            if not marker:
+                return jsonify({'error': 'not found'}), 404
+            ots_db.session.delete(marker)
+            ots_db.session.commit()
+            return jsonify({'deleted': uid})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/markers', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_markers_bulk():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.Marker import Marker
+        try:
+            uids = request.get_json(force=True).get('uids', [])
+            deleted = []
+            for uid in uids:
+                m = ots_db.session.query(Marker).filter(Marker.uid == uid).first()
+                if m:
+                    ots_db.session.delete(m)
+                    deleted.append(uid)
+            ots_db.session.commit()
+            return jsonify({'deleted': deleted})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/cot/<uid>', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_cot(uid):
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.CoT import CoT
+        try:
+            cot = ots_db.session.query(CoT).filter(CoT.uid == uid).first()
+            if not cot:
+                return jsonify({'error': 'not found'}), 404
+            ots_db.session.delete(cot)
+            ots_db.session.commit()
+            return jsonify({'deleted': uid})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/cot', methods=['DELETE'])
+    @roles_accepted('administrator')
+    def delete_cot_bulk():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.CoT import CoT
+        try:
+            uids = request.get_json(force=True).get('uids', [])
+            deleted = []
+            for uid in uids:
+                c = ots_db.session.query(CoT).filter(CoT.uid == uid).first()
+                if c:
+                    ots_db.session.delete(c)
+                    deleted.append(uid)
+            ots_db.session.commit()
+            return jsonify({'deleted': deleted})
+        except Exception as e:
+            ots_db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
 
 blueprint = MapTAKPlugin.blueprint
