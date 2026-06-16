@@ -39,3 +39,49 @@ it('renderuje waypoint jako L.marker z divIcon', () => {
   expect(L.divIcon).toHaveBeenCalled()
   expect(L.marker).toHaveBeenCalledWith([52, 21], expect.objectContaining({ icon: expect.anything() }))
 })
+
+it('renderuje freehand_polygon jako zamknięty L.polygon z kolorem CoT', () => {
+  useMapStore.setState({ shapes: [{
+    uid: 's4', name: 'Freehand', type: 'freehand_polygon',
+    points: [[52, 21], [52.1, 21.1], [52.2, 21.2], [52, 21]], meta: null,
+    color: '#ff0000',
+  }]})
+  render(<ShapeLayer />)
+  expect(L.polygon).toHaveBeenCalledWith(
+    [[52, 21], [52.1, 21.1], [52.2, 21.2], [52, 21]],
+    expect.objectContaining({ color: '#ff0000', fillColor: '#ff0000', dashArray: '6,3' }),
+  )
+})
+
+it('renderuje route jako polyline i waypointy z etykietami', () => {
+  useMapStore.setState({ shapes: [{
+    uid: 'route-1', name: 'Route', type: 'route',
+    points: [[52, 21], [52.1, 21.1]], meta: '2 WP', color: '#00ff00',
+    waypoints: [
+      { callsign: 'Start', lat: 52, lon: 21 },
+      { callsign: 'WP1', lat: 52.1, lon: 21.1 },
+    ],
+  }]})
+  render(<ShapeLayer />)
+  expect(L.polyline).toHaveBeenCalledWith(
+    [[52, 21], [52.1, 21.1]],
+    expect.objectContaining({ color: '#00ff00', weight: 3 }),
+  )
+  expect(L.marker).toHaveBeenCalledTimes(2)
+})
+
+it('renderuje spi jako marker i łącznik do pozycji EUD', () => {
+  useMapStore.setState({
+    tracks: { alpha: [[52.3, 21.3]] },
+    shapes: [{
+      uid: 'spi-1', name: 'SPI', type: 'spi',
+      points: [[52.2, 21.2]], meta: null, color: '#ff4400', senderUid: 'alpha',
+    }],
+  })
+  render(<ShapeLayer />)
+  expect(L.marker).toHaveBeenCalledWith([52.2, 21.2], expect.objectContaining({ icon: expect.anything() }))
+  expect(L.polyline).toHaveBeenCalledWith(
+    [[52.2, 21.2], [52.3, 21.3]],
+    expect.objectContaining({ color: '#ff4400', dashArray: '4,4' }),
+  )
+})

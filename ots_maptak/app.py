@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import importlib.metadata
+import datetime
 import os
 import pathlib
 import traceback
 
 import yaml
+from bs4 import BeautifulSoup, FeatureNotFound
 from flask import Blueprint, Flask, current_app as app, jsonify, request, send_from_directory
 from flask_security import roles_accepted
 from opentakserver.extensions import logger
@@ -15,6 +17,124 @@ from .default_config import DefaultConfig
 
 _HERE = pathlib.Path(__file__).resolve().parent
 _PKG  = _HERE.name  # "ots_maptak"
+
+
+def _argb_to_css(value: str | int) -> str:
+    try:
+        argb = int(float(value)) & 0xFFFFFFFF
+        r = (argb >> 16) & 0xFF
+        g = (argb >> 8) & 0xFF
+        b = argb & 0xFF
+        return f'#{r:02x}{g:02x}{b:02x}'
+    except (ValueError, TypeError):
+        return '#ffff00'
+
+
+def _parse_cot_xml(xml: str):
+    for parser in ('xml', 'lxml', 'html.parser'):
+        try:
+            return BeautifulSoup(xml, parser)
+        except FeatureNotFound:
+            continue
+    return BeautifulSoup(xml, 'html.parser')
+
+
+def _parse_cot_shape(cot) -> dict | None:
+    try:
+        soup = _parse_cot_xml(cot.xml)
+        event = soup.find('event')
+        if not event:
+            return None
+        detail = event.find('detail') or soup
+        contact = detail.find('contact') if detail else None
+        color_tag = detail.find('color') if detail else None
+        name = contact.get('callsign', cot.uid) if contact else cot.uid
+        css_color = '#ffff00'
+        if color_tag:
+            css_color = _argb_to_css(color_tag.get('value') or color_tag.get('argb') or '#ffff00')
+
+        point_tag = event.find('point')
+
+        if cot.type == 'u-d-f':
+            links = detail.find_all('link') if detail else []
+            pts = []
+            for link in links:
+                pt_str = link.get('point', '')
+                parts = pt_str.split(',')
+                if len(parts) >= 2:
+                    try:
+                        pts.append([float(parts[0]), float(parts[1])])
+                    except ValueError:
+                        pass
+            if len(pts) < 3:
+                return None
+            if pts[0] != pts[-1]:
+                pts.append(pts[0])
+            return {
+                'uid': cot.uid,
+                'name': name,
+                'type': 'freehand_polygon',
+                'points': pts,
+                'color': css_color,
+                'meta': None,
+                'senderUid': getattr(cot, 'sender_uid', None),
+                'waypoints': None,
+            }
+
+        if cot.type == 'b-m-r':
+            links = detail.find_all('link', attrs={'type': 'b-m-p-w'}) if detail else []
+            pts = []
+            waypoints = []
+            for link in links:
+                pt_str = link.get('point', '')
+                parts = pt_str.split(',')
+                if len(parts) >= 2:
+                    try:
+                        lat, lon = float(parts[0]), float(parts[1])
+                        pts.append([lat, lon])
+                        waypoints.append({
+                            'callsign': link.get('callsign', ''),
+                            'lat': lat,
+                            'lon': lon,
+                        })
+                    except ValueError:
+                        pass
+            if not pts:
+                return None
+            remarks = detail.find('remarks') if detail else None
+            route_name = remarks.get_text().strip() if remarks and remarks.get_text() else name
+            return {
+                'uid': cot.uid,
+                'name': route_name,
+                'type': 'route',
+                'points': pts,
+                'color': css_color,
+                'meta': f'{len(pts)} WP',
+                'senderUid': getattr(cot, 'sender_uid', None),
+                'waypoints': waypoints,
+            }
+
+        if cot.type == 'b-m-p-s-p-loc':
+            if not point_tag:
+                return None
+            lat = float(point_tag.get('lat', 0))
+            lon = float(point_tag.get('lon', 0))
+            if lat == 0 and lon == 0:
+                return None
+            return {
+                'uid': cot.uid,
+                'name': name,
+                'type': 'spi',
+                'points': [[lat, lon]],
+                'color': '#ff4400',
+                'meta': None,
+                'senderUid': getattr(cot, 'sender_uid', None),
+                'waypoints': None,
+            }
+
+        return None
+    except Exception:
+        return None
 
 
 class MapTAKPlugin(Plugin):
@@ -123,6 +243,66 @@ class MapTAKPlugin(Plugin):
             return (jsonify(result), 200) if result['success'] else (jsonify(result), 400)
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 400
+
+    @staticmethod
+    @roles_accepted('administrator')
+    @blueprint.route('/drawn_shapes')
+    def drawn_shapes():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.CoT import CoT
+
+        try:
+            now = datetime.datetime.now(datetime.timezone.utc)
+            cots = (
+                ots_db.session.query(CoT)
+                .filter(CoT.type.in_(['u-d-f', 'b-m-r', 'b-m-p-s-p-loc']))
+                .filter(CoT.stale >= now)
+                .order_by(CoT.timestamp.desc())
+                .limit(1000)
+                .all()
+            )
+            shapes = [shape for cot in cots if (shape := _parse_cot_shape(cot)) is not None]
+            return jsonify(shapes)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @roles_accepted('administrator')
+    @blueprint.route('/last_positions')
+    def last_positions():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.Point import Point
+        from sqlalchemy import func
+
+        try:
+            subq = (
+                ots_db.session.query(
+                    Point.device_uid,
+                    func.max(Point.timestamp).label('max_ts'),
+                )
+                .filter(Point.device_uid.isnot(None))
+                .filter(Point.latitude.isnot(None))
+                .filter(Point.longitude.isnot(None))
+                .group_by(Point.device_uid)
+                .subquery()
+            )
+            rows = (
+                ots_db.session.query(Point)
+                .join(
+                    subq,
+                    (Point.device_uid == subq.c.device_uid)
+                    & (Point.timestamp == subq.c.max_ts),
+                )
+                .all()
+            )
+            result = {
+                p.device_uid: [p.latitude, p.longitude]
+                for p in rows
+                if p.latitude is not None and p.longitude is not None
+            }
+            return jsonify(result)
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 
 blueprint = MapTAKPlugin.blueprint

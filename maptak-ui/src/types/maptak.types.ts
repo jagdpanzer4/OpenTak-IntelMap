@@ -25,6 +25,13 @@ export interface EUD {
 }
 
 export type ShapeType = 'rb_line' | 'polygon' | 'waypoint' | 'casevac'
+  | 'freehand_polygon' | 'route' | 'spi'
+
+export interface RouteWaypoint {
+  callsign: string
+  lat: number
+  lon: number
+}
 
 export interface Shape {
   uid: string
@@ -33,6 +40,9 @@ export interface Shape {
   /** [lat, lng] pairs — Leaflet LatLngTuple format */
   points: [number, number][]
   meta: string | null
+  color?: string
+  senderUid?: string
+  waypoints?: RouteWaypoint[]
 }
 
 export interface MissionUID {

@@ -80,6 +80,19 @@ export function useMapState() {
 
     // 5. Seed initial track positions from recent GPS points
     axios
+      .get('/api/plugins/ots_maptak/last_positions')
+      .then((r) => {
+        if (r.status !== 200) return
+        const positions: Record<string, [number, number]> = r.data ?? {}
+        console.debug('[MapTAK] last_positions loaded for', Object.keys(positions).length, 'EUDs')
+        Object.entries(positions).forEach(([uid, [lat, lon]]) => {
+          appendTrack(uid, [lat, lon])
+        })
+      })
+      .catch((err) => console.error('[MapTAK] last_positions error:', err))
+
+    // 6. Seed initial track positions from recent GPS points
+    axios
       .get('/api/point?per_page=500&sort_by=timestamp&sort_direction=desc')
       .then((r) => {
         if (r.status !== 200) return
@@ -98,5 +111,28 @@ export function useMapState() {
         console.debug('[MapTAK] seeded tracks for', Object.keys(byEud).length, 'EUDs')
       })
       .catch((err) => console.error('[MapTAK] points seed error:', err))
+
+    // 7. Load drawn shapes from raw CoT XML
+    axios
+      .get('/api/plugins/ots_maptak/drawn_shapes')
+      .then((r) => {
+        if (r.status !== 200) return
+        const items: any[] = Array.isArray(r.data) ? r.data : []
+        console.debug('[MapTAK] drawn_shapes loaded:', items.length)
+        items.forEach((s) => {
+          if (!s?.uid || !s?.points?.length) return
+          upsertShape({
+            uid: s.uid,
+            name: s.name ?? s.uid,
+            type: s.type,
+            points: s.points,
+            meta: s.meta ?? null,
+            color: s.color,
+            senderUid: s.senderUid,
+            waypoints: s.waypoints,
+          })
+        })
+      })
+      .catch((err) => console.error('[MapTAK] drawn_shapes error:', err))
   }, [hydrate, upsertShape, appendTrack, setConfig])
 }

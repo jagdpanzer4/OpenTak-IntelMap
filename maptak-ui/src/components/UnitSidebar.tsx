@@ -142,6 +142,7 @@ function MissionRow({ mission, checked, onToggle }: {
 
 const SHAPE_ICONS: Record<string, string> = {
   waypoint: '📍', casevac: '🚑', rb_line: '📏', polygon: '⬡',
+  freehand_polygon: '⬡', route: '🛤️', spi: '🎯',
 }
 
 function ShapeRow({ shape }: { shape: Shape }) {
@@ -150,6 +151,9 @@ function ShapeRow({ shape }: { shape: Shape }) {
     : shape.type === 'casevac' ? 'CASEVAC'
     : shape.type === 'waypoint' ? 'Marker'
     : shape.type === 'polygon' ? 'Obszar'
+    : shape.type === 'freehand_polygon' ? 'Obszar'
+    : shape.type === 'route' ? 'Trasa'
+    : shape.type === 'spi' ? 'SPI'
     : shape.type
   return (
     <li className={styles.shapeRow}>
