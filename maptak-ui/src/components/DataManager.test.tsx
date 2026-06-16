@@ -24,7 +24,8 @@ it('przełącza się do zakładki Markery', async () => {
   fireEvent.click(screen.getByRole('button', { name: /Markery/i }))
   await waitFor(() => {
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/data/markers')
+      expect.stringContaining('/data/markers'),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
     )
   })
 })
@@ -40,7 +41,10 @@ it('wyszukiwarka wywołuje fetch z parametrem q', async () => {
   const input = screen.getByPlaceholderText(/Szukaj eud/i)
   fireEvent.change(input, { target: { value: 'alpha' } })
   await waitFor(() => {
-    expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('q=alpha'))
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('q=alpha'),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    )
   })
 })
 

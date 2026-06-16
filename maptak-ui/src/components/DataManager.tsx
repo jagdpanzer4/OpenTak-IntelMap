@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { DataEUD, DataMarker, DataCotItem, DataTab } from '../types/maptak.types'
 import { DATA_TAB_LABELS, DATA_TAB_COT_TYPE } from '../types/maptak.types'
 import EudTable from './data/EudTable'
@@ -25,7 +25,14 @@ export default function DataManager() {
   const [spis, setSpis] = useState<DataCotItem[]>([])
   const [counts, setCounts] = useState<Counts>({ euds: 0, markers: 0, routes: 0, shapes: 0, spis: 0 })
 
+  const abortRef = useRef<AbortController | null>(null)
+
   const fetchTab = useCallback(async (tab: DataTab, q: string, sf: string) => {
+    // Cancel previous request
+    if (abortRef.current) abortRef.current.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     try {
       const cotType = DATA_TAB_COT_TYPE[tab]
       let url = ''
@@ -34,7 +41,7 @@ export default function DataManager() {
       else if (cotType) url = `${API}/data/cot?type=${cotType}&q=${encodeURIComponent(q)}`
       else return
 
-      const r = await fetch(url)
+      const r = await fetch(url, { signal: controller.signal })
       if (!r.ok) return
       const data = await r.json()
       const results = data.results ?? []
@@ -44,14 +51,18 @@ export default function DataManager() {
       else if (tab === 'routes') { setRoutes(results); setCounts((c) => ({ ...c, routes: data.total ?? results.length })) }
       else if (tab === 'shapes') { setShapes(results); setCounts((c) => ({ ...c, shapes: data.total ?? results.length })) }
       else if (tab === 'spis') { setSpis(results); setCounts((c) => ({ ...c, spis: data.total ?? results.length })) }
-    } catch {
-      // network error — silent fail
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'AbortError') return // cancelled
+      // other network errors — silent fail
     }
   }, [])
 
   useEffect(() => {
     setSelected(new Set())
-    fetchTab(activeTab, query, statusFilter)
+    const timer = setTimeout(() => {
+      fetchTab(activeTab, query, statusFilter)
+    }, 250)
+    return () => clearTimeout(timer)
   }, [activeTab, query, statusFilter, fetchTab])
 
   const handleDelete = useCallback(async (uid: string) => {

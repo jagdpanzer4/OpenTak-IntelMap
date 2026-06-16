@@ -384,15 +384,17 @@ class MapTAKPlugin(Plugin):
             results = []
             for c in cots:
                 shape = _parse_cot_shape(c)
+                if shape is None:
+                    continue
                 results.append({
                     'uid': c.uid,
-                    'name': shape['name'] if shape else c.uid,
+                    'name': shape['name'],
                     'type': c.type,
                     'sender_uid': c.sender_uid or '',
                     'timestamp': c.timestamp.isoformat() if c.timestamp else None,
-                    'color': shape.get('color') if shape else None,
-                    'point_count': len(shape['points']) if shape and shape.get('points') else (
-                        len(shape['waypoints']) if shape and shape.get('waypoints') else 1
+                    'color': shape.get('color'),
+                    'point_count': len(shape['points']) if shape.get('points') else (
+                        len(shape['waypoints']) if shape.get('waypoints') else 1
                     ),
                 })
             return jsonify({'results': results, 'total': len(results)})
@@ -423,7 +425,7 @@ class MapTAKPlugin(Plugin):
         from opentakserver.extensions import db as ots_db
         from opentakserver.models.EUD import EUD
         try:
-            uids = request.get_json(force=True).get('uids', [])
+            uids = (request.get_json(force=True, silent=True) or {}).get('uids', [])
             if not uids:
                 return jsonify({'deleted': []}), 200
             deleted = []
@@ -462,7 +464,7 @@ class MapTAKPlugin(Plugin):
         from opentakserver.extensions import db as ots_db
         from opentakserver.models.Marker import Marker
         try:
-            uids = request.get_json(force=True).get('uids', [])
+            uids = (request.get_json(force=True, silent=True) or {}).get('uids', [])
             if not uids:
                 return jsonify({'deleted': []}), 200
             deleted = []
@@ -501,7 +503,7 @@ class MapTAKPlugin(Plugin):
         from opentakserver.extensions import db as ots_db
         from opentakserver.models.CoT import CoT
         try:
-            uids = request.get_json(force=True).get('uids', [])
+            uids = (request.get_json(force=True, silent=True) or {}).get('uids', [])
             if not uids:
                 return jsonify({'deleted': []}), 200
             deleted = []
