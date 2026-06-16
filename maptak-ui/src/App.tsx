@@ -37,7 +37,7 @@ export default function App() {
       </nav>
       <div className={styles.viewArea}>
         {view === 'map' ? (
-          <div className={`${styles.layout} ${selectedUid ? styles.layoutWithPanel : ''}`} style={{flex:1}}>
+          <div className={`${styles.layout} ${selectedUid ? styles.layoutWithPanel : ''}`}>
             <UnitSidebar />
             <div className={styles.mapWrapper}>
               <LiveIndicator />

@@ -4,6 +4,7 @@
   height: 100vh;
   overflow: hidden;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  flex: 1;
 }
 
 .layoutWithPanel {
