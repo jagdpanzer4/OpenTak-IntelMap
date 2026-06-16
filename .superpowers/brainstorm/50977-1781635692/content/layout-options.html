@@ -1,0 +1,104 @@
+<h2>Układ zakładki Zarządzaj danymi</h2>
+<p class="subtitle">Wybierz podejście do nawigacji między typami danych</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Zakładki poziome (sub-tabs)</h3>
+      <p>Każdy typ danych w osobnej zakładce: EUD | Markery | Trasy | Kształty | SPI.<br>
+      Standardowy pattern, znany z paneli administracyjnych.<br>
+      <strong>Złożoność:</strong> niska. <strong>Dobre gdy:</strong> typy są od siebie niezależne.</p>
+      <div class="mockup" style="margin-top:10px">
+        <div class="mockup-header">Podgląd</div>
+        <div class="mockup-body" style="padding:8px">
+          <div style="display:flex;gap:4px;border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:8px">
+            <span style="background:#1a73e8;color:#fff;padding:4px 10px;border-radius:4px 4px 0 0;font-size:12px">EUD</span>
+            <span style="background:#2a2a2a;color:#aaa;padding:4px 10px;border-radius:4px 4px 0 0;font-size:12px">Markery</span>
+            <span style="background:#2a2a2a;color:#aaa;padding:4px 10px;border-radius:4px 4px 0 0;font-size:12px">Trasy</span>
+            <span style="background:#2a2a2a;color:#aaa;padding:4px 10px;border-radius:4px 4px 0 0;font-size:12px">Kształty</span>
+            <span style="background:#2a2a2a;color:#aaa;padding:4px 10px;border-radius:4px 4px 0 0;font-size:12px">SPI</span>
+          </div>
+          <div style="font-size:11px;color:#aaa">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:4px;margin-bottom:4px;font-weight:bold">
+              <span>Callsign</span><span>Team</span><span>Ostatni ping</span><span>🗑</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:4px">
+              <span style="color:#0f0">Alpha-1</span><span>Cyan</span><span>2min temu</span><span style="color:#e55">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:4px">
+              <span style="color:#888">Bravo-2</span><span>Red</span><span>45min temu</span><span style="color:#e55">✕</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Ujednolicona tabela + filtr typu</h3>
+      <p>Jedna tabela ze wszystkimi obiektami, filtrowana dropdownem (Wszystkie / EUD / Marker / Trasa…).<br>
+      Można jednocześnie widzieć dane z różnych kategorii i wykonywać masowe usuwanie.<br>
+      <strong>Złożoność:</strong> średnia. <strong>Dobre gdy:</strong> dane są strukturalnie podobne.</p>
+      <div class="mockup" style="margin-top:10px">
+        <div class="mockup-header">Podgląd</div>
+        <div class="mockup-body" style="padding:8px">
+          <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+            <input class="mock-input" style="flex:1;font-size:11px" placeholder="🔍 Szukaj...">
+            <select style="background:#2a2a2a;color:#ccc;border:1px solid #444;padding:4px;border-radius:4px;font-size:11px">
+              <option>Wszystkie typy</option>
+            </select>
+            <button class="mock-button" style="font-size:11px;background:#c0392b">Usuń zaznaczone</button>
+          </div>
+          <div style="font-size:11px;color:#aaa">
+            <div style="display:grid;grid-template-columns:20px 80px 1fr 80px auto;gap:4px;margin-bottom:4px;font-weight:bold">
+              <span>☐</span><span>Typ</span><span>Nazwa</span><span>Data</span><span>🗑</span>
+            </div>
+            <div style="display:grid;grid-template-columns:20px 80px 1fr 80px auto;gap:4px">
+              <span>☑</span><span style="color:#1a73e8">EUD</span><span style="color:#0f0">Alpha-1</span><span>16:23</span><span style="color:#e55">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:20px 80px 1fr 80px auto;gap:4px">
+              <span>☐</span><span style="color:#f0a">Kształt</span><span>Obszar_1</span><span>15:44</span><span style="color:#e55">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:20px 80px 1fr 80px auto;gap:4px">
+              <span>☐</span><span style="color:#fa0">Trasa</span><span>Route_Trzmiel</span><span>14:10</span><span style="color:#e55">✕</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Panel boczny + tabela (jak IDE)</h3>
+      <p>Lewa kolumna: drzewo kategorii z licznikami (EUD 5 / Markery 12 / …). Prawa: tabela wybranej kategorii.<br>
+      Najbardziej rozbudowany układ, daje szybki overview wszystkich typów jednocześnie.<br>
+      <strong>Złożoność:</strong> wyższa. <strong>Dobre gdy:</strong> masz dużo danych i potrzebujesz nawigować szybko.</p>
+      <div class="mockup" style="margin-top:10px">
+        <div class="mockup-header">Podgląd</div>
+        <div class="mockup-body" style="padding:8px;display:flex;gap:8px">
+          <div style="width:90px;font-size:11px;border-right:1px solid #444;padding-right:8px">
+            <div style="color:#1a73e8;font-weight:bold;margin-bottom:4px">▶ EUD <span style="color:#555">(5)</span></div>
+            <div style="color:#aaa;margin-bottom:4px">▶ Markery <span style="color:#555">(12)</span></div>
+            <div style="color:#aaa;margin-bottom:4px">▶ Trasy <span style="color:#555">(3)</span></div>
+            <div style="color:#aaa;margin-bottom:4px">▶ Kształty <span style="color:#555">(4)</span></div>
+            <div style="color:#aaa">▶ SPI <span style="color:#555">(2)</span></div>
+          </div>
+          <div style="flex:1;font-size:11px;color:#aaa">
+            <div style="margin-bottom:6px;color:#fff;font-weight:bold">EUD — 5 urządzeń</div>
+            <div style="display:grid;grid-template-columns:1fr 60px auto;gap:4px">
+              <span style="color:#0f0">Alpha-1</span><span>online</span><span style="color:#e55">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 60px auto;gap:4px">
+              <span style="color:#888">Bravo-2</span><span>offline</span><span style="color:#e55">✕</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

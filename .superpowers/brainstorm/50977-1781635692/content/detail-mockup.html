@@ -1,0 +1,93 @@
+<h2>Zakładka "Dane" — szczegółowy układ</h2>
+<p class="subtitle">Jak powinna wyglądać każda sub-zakładka? Oceń kolumny i dostępne akcje</p>
+
+<div class="mockup">
+  <div class="mockup-header">MapTAK → Dane (sub-zakładka: EUD)</div>
+  <div class="mockup-body" style="padding:10px">
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:3px;margin-bottom:10px;border-bottom:2px solid #333;padding-bottom:0">
+      <span style="background:#1a73e8;color:#fff;padding:5px 12px;border-radius:4px 4px 0 0;font-size:12px;font-weight:bold">EUD <span style="background:#0d47a1;border-radius:8px;padding:1px 6px;margin-left:4px">5</span></span>
+      <span style="background:#2a2a2a;color:#888;padding:5px 12px;border-radius:4px 4px 0 0;font-size:12px">Markery <span style="color:#555">12</span></span>
+      <span style="background:#2a2a2a;color:#888;padding:5px 12px;border-radius:4px 4px 0 0;font-size:12px">Trasy <span style="color:#555">3</span></span>
+      <span style="background:#2a2a2a;color:#888;padding:5px 12px;border-radius:4px 4px 0 0;font-size:12px">Kształty <span style="color:#555">4</span></span>
+      <span style="background:#2a2a2a;color:#888;padding:5px 12px;border-radius:4px 4px 0 0;font-size:12px">SPI <span style="color:#555">2</span></span>
+    </div>
+
+    <!-- Toolbar -->
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+      <input class="mock-input" style="flex:1;font-size:12px" placeholder="🔍 Szukaj callsign, team...">
+      <select style="background:#1e1e1e;color:#ccc;border:1px solid #444;padding:5px 8px;border-radius:4px;font-size:12px">
+        <option>Wszystkie</option><option>Online</option><option>Offline</option>
+      </select>
+      <button class="mock-button" style="font-size:12px;background:#c0392b;opacity:0.5">🗑 Usuń zaznaczone (0)</button>
+    </div>
+
+    <!-- Table header -->
+    <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 100px 100px 50px;gap:6px;font-size:11px;color:#888;font-weight:bold;padding:4px 0;border-bottom:1px solid #333;margin-bottom:4px">
+      <span>☐</span><span>Callsign</span><span>Team</span><span>Rola</span><span>Platforma</span><span>Ostatni ping</span><span></span>
+    </div>
+
+    <!-- Row 1 - online -->
+    <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 100px 100px 50px;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #222;align-items:center">
+      <span style="color:#aaa">☐</span>
+      <span style="color:#00e676;font-weight:bold">Alpha-1</span>
+      <span style="color:#00bcd4">Cyan</span>
+      <span style="color:#aaa">Team Lead</span>
+      <span style="color:#aaa">ATAK-CIV</span>
+      <span style="color:#4caf50">● 2 min temu</span>
+      <button class="mock-button" style="font-size:10px;background:#c0392b;padding:2px 6px">✕</button>
+    </div>
+
+    <!-- Row 2 - offline -->
+    <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 100px 100px 50px;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #222;align-items:center;opacity:0.6">
+      <span style="color:#aaa">☐</span>
+      <span style="color:#aaa">Bravo-2</span>
+      <span style="color:#f44336">Red</span>
+      <span style="color:#aaa">Medic</span>
+      <span style="color:#aaa">iTAK</span>
+      <span style="color:#f44336">● 47 min temu</span>
+      <button class="mock-button" style="font-size:10px;background:#c0392b;padding:2px 6px">✕</button>
+    </div>
+
+    <!-- Row 3 -->
+    <div style="display:grid;grid-template-columns:24px 1fr 80px 80px 100px 100px 50px;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #222;align-items:center">
+      <span style="color:#aaa">☐</span>
+      <span style="color:#00e676;font-weight:bold">Charlie-3</span>
+      <span style="color:#4caf50">Green</span>
+      <span style="color:#aaa">Sniper</span>
+      <span style="color:#aaa">ATAK-MIL</span>
+      <span style="color:#4caf50">● 5 min temu</span>
+      <button class="mock-button" style="font-size:10px;background:#c0392b;padding:2px 6px">✕</button>
+    </div>
+
+    <div style="font-size:11px;color:#555;margin-top:8px">Wyświetlono 3 z 5 EUD</div>
+  </div>
+</div>
+
+<div style="margin-top:16px">
+<h3>Pytania do weryfikacji</h3>
+<p class="subtitle">Zaznacz elementy, które chcesz zmienić / dodać</p>
+<div class="options" data-multiselect>
+  <div class="option" data-choice="bulk" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content"><h3>Chcę bulk-select (zaznacz wszystkie)</h3><p>Checkbox w nagłówku zaznaczający całą stronę</p></div>
+  </div>
+  <div class="option" data-choice="details" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content"><h3>Kliknięcie wiersza → szczegóły</h3><p>Rozwijanie wiersza lub panel boczny z pełnymi danymi CoT</p></div>
+  </div>
+  <div class="option" data-choice="mission-filter" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content"><h3>Filtr po misji</h3><p>Dropdown "Misja" obok wyszukiwarki — filtruje dane powiązane z misją</p></div>
+  </div>
+  <div class="option" data-choice="pagination" onclick="toggleSelect(this)">
+    <div class="letter">+</div>
+    <div class="content"><h3>Paginacja / "załaduj więcej"</h3><p>Dla dużych zbiorów danych (>100 wpisów)</p></div>
+  </div>
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content"><h3>Wygląda dobrze — to wystarczy</h3><p>Szukaj + filtr statusu + delete pojedynczo i bulk</p></div>
+  </div>
+</div>
+</div>
