@@ -304,5 +304,100 @@ class MapTAKPlugin(Plugin):
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 
+    @staticmethod
+    @blueprint.route('/data/euds')
+    @roles_accepted('administrator')
+    def data_euds():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.EUD import EUD
+        try:
+            q = request.args.get('q', '').lower()
+            status = request.args.get('status', 'all')
+            query = ots_db.session.query(EUD)
+            if q:
+                query = query.filter(EUD.callsign.ilike(f'%{q}%'))
+            if status == 'online':
+                query = query.filter(EUD.last_status == 'Connected')
+            elif status == 'offline':
+                query = query.filter(EUD.last_status != 'Connected')
+            euds = query.order_by(EUD.last_event_time.desc().nullslast()).limit(500).all()
+            results = []
+            for e in euds:
+                results.append({
+                    'uid': e.uid,
+                    'callsign': e.callsign or '',
+                    'team': e.team or '',
+                    'team_role': e.team_role or '',
+                    'platform': e.platform or '',
+                    'last_status': e.last_status or 'Disconnected',
+                    'last_event_time': e.last_event_time.isoformat() if e.last_event_time else None,
+                })
+            return jsonify({'results': results, 'total': len(results)})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/markers')
+    @roles_accepted('administrator')
+    def data_markers():
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.Marker import Marker
+        try:
+            q = request.args.get('q', '').lower()
+            query = ots_db.session.query(Marker)
+            if q:
+                query = query.filter(
+                    (Marker.callsign.ilike(f'%{q}%')) | (Marker.type.ilike(f'%{q}%'))
+                )
+            markers = query.order_by(Marker.timestamp.desc().nullslast()).limit(500).all()
+            results = []
+            for m in markers:
+                results.append({
+                    'uid': m.uid,
+                    'callsign': m.callsign or '',
+                    'type': m.type or '',
+                    'latitude': float(m.latitude) if m.latitude is not None else None,
+                    'longitude': float(m.longitude) if m.longitude is not None else None,
+                    'timestamp': m.timestamp.isoformat() if m.timestamp else None,
+                })
+            return jsonify({'results': results, 'total': len(results)})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
+    @staticmethod
+    @blueprint.route('/data/cot')
+    @roles_accepted('administrator')
+    def data_cot():
+        """List drawn shapes (routes, polygons, SPIs) by type filter."""
+        from opentakserver.extensions import db as ots_db
+        from opentakserver.models.CoT import CoT
+        try:
+            cot_type = request.args.get('type', 'u-d-f')
+            q = request.args.get('q', '').lower()
+            allowed = ['u-d-f', 'b-m-r', 'b-m-p-s-p-loc']
+            if cot_type not in allowed:
+                return jsonify({'error': 'invalid type'}), 400
+            query = ots_db.session.query(CoT).filter(CoT.type == cot_type)
+            if q:
+                query = query.filter(CoT.uid.ilike(f'%{q}%'))
+            cots = query.order_by(CoT.timestamp.desc().nullslast()).limit(500).all()
+            results = []
+            for c in cots:
+                shape = _parse_cot_shape(c)
+                results.append({
+                    'uid': c.uid,
+                    'name': shape['name'] if shape else c.uid,
+                    'type': c.type,
+                    'sender_uid': c.sender_uid or '',
+                    'timestamp': c.timestamp.isoformat() if c.timestamp else None,
+                    'color': shape.get('color') if shape else None,
+                    'point_count': len(shape['points']) if shape and shape.get('points') else (
+                        len(shape['waypoints']) if shape and shape.get('waypoints') else 1
+                    ),
+                })
+            return jsonify({'results': results, 'total': len(results)})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
 
 blueprint = MapTAKPlugin.blueprint
