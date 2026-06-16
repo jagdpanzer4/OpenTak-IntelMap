@@ -15,3 +15,64 @@
   height: 100%;
   overflow: hidden;
 }
+
+.appShell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0d1b2a;
+}
+
+.topNav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  background: #0a1628;
+  border-bottom: 1px solid #0f3460;
+  flex-shrink: 0;
+  height: 36px;
+}
+
+.topNavBrand {
+  font-size: 11px;
+  font-weight: 700;
+  color: #e94560;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-right: 16px;
+}
+
+.navBtn {
+  padding: 4px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #a0c4ff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navBtn:hover {
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.navBtnActive {
+  background: #0f3460;
+  color: #ffffff;
+  border-color: #1a4a8a;
+}
+
+.viewArea {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
