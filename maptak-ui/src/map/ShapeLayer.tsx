@@ -32,7 +32,13 @@ export default function ShapeLayer() {
 
       } else if ((shape.type === 'waypoint' || shape.type === 'casevac') && shape.points.length >= 1) {
         const color = shape.type === 'casevac' ? '#ff4444' : '#ffd700'
-        L.circleMarker(shape.points[0], { radius: 6, color, fillOpacity: 0.8 })
+        const label = shape.type === 'casevac' ? '🚑' : '📍'
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="background:${color};color:#000;border-radius:4px;padding:1px 4px;font-family:Inter,system-ui,sans-serif;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(0,0,0,.4)">${label} ${shape.name}</div>`,
+          iconAnchor: [0, 12],
+        })
+        L.marker(shape.points[0], { icon })
           .bindPopup(`<b>${shape.name}</b>`)
           .addTo(layerRef.current)
       }

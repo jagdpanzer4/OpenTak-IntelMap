@@ -35,18 +35,22 @@ export interface Shape {
   meta: string | null
 }
 
-export interface MissionItem {
-  uid: string
-  name: string
-  type: string
-  latitude: number | null
-  longitude: number | null
+export interface MissionUID {
+  /** The CoT/EUD uid that belongs to this mission */
+  data: string
+  creatorUid: string
+  details?: {
+    type?: string
+    callsign?: string
+    iconsetPath?: string
+    color?: string
+  }
 }
 
 export interface Mission {
-  uid: string
   name: string
-  items: MissionItem[]
+  guid: string
+  uids: MissionUID[]
 }
 
 export type FilterType = 'all' | 'eud' | 'mission' | 'shape'
@@ -84,6 +88,8 @@ export interface MapStore {
   filterQuery: string
   filterType: FilterType
 
+  selectedMissions: string[]  // mission names used as active filters (empty = show all)
+
   upsertEud: (eud: EUD) => void
   appendTrack: (uid: string, point: [number, number]) => void
   upsertShape: (shape: Shape) => void
@@ -93,6 +99,7 @@ export interface MapStore {
   setFollowUid: (uid: string | null) => void
   setFilterQuery: (q: string) => void
   setFilterType: (t: FilterType) => void
+  toggleMission: (name: string) => void
   hydrate: (data: {
     euds: EUD[]
     markers: unknown[]

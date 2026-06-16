@@ -5,10 +5,18 @@ import { useMapStore } from '../hooks/useMapStore'
 import { DEFAULT_CONFIG } from '../types/maptak.types'
 import L from 'leaflet'
 
+const ATAK_EUD = {
+  uid: 'u1', callsign: 'Alpha', device: 'Samsung', os: 'Android', platform: 'ATAK-CIV',
+  version: '4.9', last_status: 'Connected' as const, last_event_time: null,
+  team: null, team_color: null, team_role: null, username: null,
+}
+
 beforeEach(() => {
-  useMapStore.setState({ euds: {}, tracks: {}, shapes: [], missions: [],
-    config: DEFAULT_CONFIG,
-    selectedUid: null, followUid: null, filterQuery: '', filterType: 'all' })
+  useMapStore.setState({
+    euds: { u1: ATAK_EUD }, tracks: {}, shapes: [], missions: [],
+    config: DEFAULT_CONFIG, selectedMissions: [],
+    selectedUid: null, followUid: null, filterQuery: '', filterType: 'all',
+  })
   vi.clearAllMocks()
 })
 

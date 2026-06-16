@@ -14,7 +14,7 @@ beforeEach(() => {
     euds: {}, tracks: {}, shapes: [], missions: [],
     config: DEFAULT_CONFIG,
     selectedUid: null, followUid: null,
-    filterQuery: '', filterType: 'all',
+    filterQuery: '', filterType: 'all', selectedMissions: [],
   })
 })
 

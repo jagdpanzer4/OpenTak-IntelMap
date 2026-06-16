@@ -22,12 +22,13 @@ export function useSocketEvents() {
     }
 
     const onRBLine = (rb: any) => {
-      if (!rb?.uid || !rb?.point1 || !rb?.point2) return
+      // API: { uid, point: { latitude, longitude }, end_latitude, end_longitude, bearing, range, callsign }
+      if (!rb?.uid || !rb?.point?.latitude || rb?.end_latitude == null) return
       upsertShape({
-        uid: rb.uid, name: rb.uid, type: 'rb_line',
-        points: [[rb.point1.latitude, rb.point1.longitude],
-                 [rb.point2.latitude, rb.point2.longitude]],
-        meta: `${rb.bearing ?? ''}° / ${rb.distance ?? ''}m`,
+        uid: rb.uid, name: rb.callsign ?? rb.uid, type: 'rb_line',
+        points: [[rb.point.latitude, rb.point.longitude],
+                 [rb.end_latitude, rb.end_longitude]],
+        meta: `${rb.bearing ?? ''}° / ${rb.range ?? ''}m`,
       })
     }
 

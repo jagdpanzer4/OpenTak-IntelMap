@@ -113,10 +113,20 @@
   border-bottom: 1px solid #0a1520;
   font-size: 10px;
   color: #ffd700;
+  cursor: pointer;
+}
+
+.missionRow:hover { background: #1a2744; }
+.missionRow.missionActive { background: #1a2744; border-left: 2px solid #ffd700; }
+
+.missionCheck {
+  accent-color: #ffd700;
+  flex-shrink: 0;
 }
 
 .missionIcon { font-size: 12px; }
 .missionName { color: #ffd700; font-weight: 600; }
+.missionFilter { color: #ffd700; cursor: pointer; }
 
 .footer {
   padding: 6px 12px;

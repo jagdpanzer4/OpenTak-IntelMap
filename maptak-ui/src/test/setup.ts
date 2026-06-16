@@ -11,6 +11,7 @@ vi.mock('leaflet', () => {
     addTo: vi.fn().mockReturnThis(),
     on: vi.fn().mockReturnThis(),
     bindTooltip: vi.fn().mockReturnThis(),
+    bindPopup: vi.fn().mockReturnThis(),
     setIcon: vi.fn(),
     slideTo: vi.fn(),
     setRotationAngle: vi.fn(),

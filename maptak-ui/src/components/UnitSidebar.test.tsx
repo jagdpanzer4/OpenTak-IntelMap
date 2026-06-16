@@ -22,7 +22,7 @@ beforeEach(() => {
   useMapStore.setState({
     euds: { a1: eudOnline, b2: eudOffline }, tracks: {}, shapes: [], missions: [],
     config: DEFAULT_CONFIG,
-    selectedUid: null, followUid: null, filterQuery: '', filterType: 'all',
+    selectedUid: null, followUid: null, filterQuery: '', filterType: 'all', selectedMissions: [],
   })
 })
 

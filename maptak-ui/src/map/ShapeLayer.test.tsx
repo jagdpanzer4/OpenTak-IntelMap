@@ -7,7 +7,7 @@ import L from 'leaflet'
 
 beforeEach(() => {
   useMapStore.setState({ euds: {}, tracks: {}, shapes: [], missions: [],
-    config: DEFAULT_CONFIG,
+    config: DEFAULT_CONFIG, selectedMissions: [],
     selectedUid: null, followUid: null, filterQuery: '', filterType: 'all' })
   vi.clearAllMocks()
 })
@@ -30,11 +30,12 @@ it('renderuje polygon jako L.polygon', () => {
   expect(L.polygon).toHaveBeenCalledOnce()
 })
 
-it('renderuje waypoint jako circleMarker', () => {
+it('renderuje waypoint jako L.marker z divIcon', () => {
   useMapStore.setState({ shapes: [{
     uid: 's3', name: 'WP1', type: 'waypoint',
     points: [[52, 21]], meta: null,
   }]})
   render(<ShapeLayer />)
-  expect(L.circleMarker).toHaveBeenCalledOnce()
+  expect(L.divIcon).toHaveBeenCalled()
+  expect(L.marker).toHaveBeenCalledWith([52, 21], expect.objectContaining({ icon: expect.anything() }))
 })

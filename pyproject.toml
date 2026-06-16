@@ -1,7 +1,7 @@
 [project]
 name = "ots-maptak"
 description = "Tactical map plugin for OpenTAKServer"
-authors = [{name = "OpenTAKIntel"}]
+authors = [{name = "Jaeger /CROZT"}]
 readme = "README.md"
 license = "GPL-3.0-or-later"
 dynamic = ["version"]

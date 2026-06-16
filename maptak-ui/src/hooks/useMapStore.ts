@@ -14,6 +14,7 @@ export const useMapStore = create<MapStore>((set, get) => ({
   followUid: null,
   filterQuery: '',
   filterType: 'all',
+  selectedMissions: [],
 
   upsertEud: (eud: EUD) =>
     set((state) => {
@@ -63,6 +64,13 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setFilterQuery: (q) => set({ filterQuery: q }),
   setFilterType: (t: FilterType) => set({ filterType: t }),
 
+  toggleMission: (name: string) =>
+    set((state) => ({
+      selectedMissions: state.selectedMissions.includes(name)
+        ? state.selectedMissions.filter((n) => n !== name)
+        : [...state.selectedMissions, name],
+    })),
+
   hydrate: ({ euds, markers, rb_lines, casevacs }) => {
     const { upsertEud, upsertShape } = get()
 
@@ -81,17 +89,18 @@ export const useMapStore = create<MapStore>((set, get) => ({
       })
     })
 
+    // RBLines: { uid, point: { latitude, longitude }, end_latitude, end_longitude, bearing, range, ... }
     ;(rb_lines as any[]).forEach((rb) => {
-      if (!rb?.uid || !rb?.point1 || !rb?.point2) return
+      if (!rb?.uid || !rb?.point?.latitude || rb?.end_latitude == null) return
       upsertShape({
         uid: rb.uid,
-        name: rb.uid,
+        name: rb.callsign ?? rb.uid,
         type: 'rb_line',
         points: [
-          [rb.point1.latitude, rb.point1.longitude],
-          [rb.point2.latitude, rb.point2.longitude],
+          [rb.point.latitude, rb.point.longitude],
+          [rb.end_latitude, rb.end_longitude],
         ],
-        meta: `${rb.bearing ?? ''}° / ${rb.distance ?? ''}m`,
+        meta: `${rb.bearing ?? ''}° / ${rb.range ?? ''}m`,
       })
     })
 

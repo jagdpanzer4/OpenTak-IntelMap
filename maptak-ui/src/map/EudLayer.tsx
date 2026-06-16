@@ -1,42 +1,51 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet-rotatedmarker'
 import 'leaflet.marker.slideto'
-import * as milsymbolLib from 'milsymbol'
 import { useMapStore } from '../hooks/useMapStore'
 import type { EUD } from '../types/maptak.types'
 
-const milsymbol = (milsymbolLib as any).default ?? milsymbolLib
-
 export default function EudLayer() {
-  const map        = useMap()
-  const euds       = useMapStore((s) => s.euds)
-  const tracks     = useMapStore((s) => s.tracks)
-  const config     = useMapStore((s) => s.config)
-  const selectUnit = useMapStore((s) => s.selectUnit)
-  const markersRef = useRef<Record<string, L.Marker>>({})
-  const layerRef   = useRef<L.LayerGroup | null>(null)
+  const map              = useMap()
+  const euds             = useMapStore((s) => s.euds)
+  const tracks           = useMapStore((s) => s.tracks)
+  const config           = useMapStore((s) => s.config)
+  const missions         = useMapStore((s) => s.missions)
+  const selectedMissions = useMapStore((s) => s.selectedMissions)
+  const selectUnit       = useMapStore((s) => s.selectUnit)
+  const markersRef       = useRef<Record<string, L.Marker>>({})
+  const layerRef         = useRef<L.LayerGroup | null>(null)
 
   useEffect(() => {
     layerRef.current = L.layerGroup().addTo(map)
     return () => { layerRef.current?.remove() }
   }, [map])
 
+  // Compute the set of EUD UIDs from selected missions (null = no filter)
+  const activeMissionEuds = useMemo<Set<string> | null>(() => {
+    if (selectedMissions.length === 0) return null
+    return new Set(
+      missions
+        .filter((m) => selectedMissions.includes(m.name))
+        .flatMap((m) => m.uids.map((u) => u.data)),
+    )
+  }, [selectedMissions, missions])
+
   useEffect(() => {
     if (!layerRef.current) return
 
+    const shouldShow = (eud: EUD) => {
+      if (config.MAPTAK_ONLY_ATAK_EUDS && (!eud.device || !eud.os || !eud.platform)) return false
+      if (!config.MAPTAK_SHOW_OFFLINE_EUDS && eud.last_status !== 'Connected') return false
+      if (activeMissionEuds && !activeMissionEuds.has(eud.uid)) return false
+      return !!tracks[eud.uid]?.at(-1)
+    }
+
     Object.values(euds).forEach((eud) => {
-      // Filter: only show ATAK clients (have device/os/platform) if config says so
-      if (config.MAPTAK_ONLY_ATAK_EUDS && (!eud.device || !eud.os || !eud.platform)) return
-      // Filter: hide offline EUDs if config says so
-      if (!config.MAPTAK_SHOW_OFFLINE_EUDS && eud.last_status !== 'Connected') return
+      if (!shouldShow(eud)) return
 
-      // Position comes from tracks, not from eud object
-      const track = tracks[eud.uid]
-      const lastPt = track?.at(-1)
-      if (!lastPt) return  // no position yet
-
+      const lastPt = tracks[eud.uid]!.at(-1)!
       const latlng: L.LatLngExpression = [lastPt[0], lastPt[1]]
       const icon = buildIcon(eud)
 
@@ -53,19 +62,15 @@ export default function EudLayer() {
       }
     })
 
-    // Remove markers for EUDs that no longer exist or have been filtered
+    // Remove markers for EUDs that no longer pass filters
     Object.keys(markersRef.current).forEach((uid) => {
       const eud = euds[uid]
-      const shouldShow = eud &&
-        (!config.MAPTAK_ONLY_ATAK_EUDS || (eud.device && eud.os && eud.platform)) &&
-        (config.MAPTAK_SHOW_OFFLINE_EUDS || eud.last_status === 'Connected') &&
-        tracks[uid]?.at(-1)
-      if (!shouldShow) {
+      if (!eud || !shouldShow(eud)) {
         markersRef.current[uid].remove()
         delete markersRef.current[uid]
       }
     })
-  }, [euds, tracks, config, selectUnit])
+  }, [euds, tracks, config, selectUnit, activeMissionEuds])
 
   return null
 }

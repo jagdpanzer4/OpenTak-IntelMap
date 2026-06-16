@@ -4,15 +4,17 @@ import type { EUD, FilterType, Mission } from '../types/maptak.types'
 import styles from './UnitSidebar.module.css'
 
 export default function UnitSidebar() {
-  const euds         = useMapStore((s) => s.euds)
-  const missions     = useMapStore((s) => s.missions)
-  const filterQuery  = useMapStore((s) => s.filterQuery)
-  const filterType   = useMapStore((s) => s.filterType)
-  const selectedUid  = useMapStore((s) => s.selectedUid)
-  const selectUnit   = useMapStore((s) => s.selectUnit)
-  const setFilterQuery = useMapStore((s) => s.setFilterQuery)
-  const setFilterType  = useMapStore((s) => s.setFilterType)
-  const config       = useMapStore((s) => s.config)
+  const euds             = useMapStore((s) => s.euds)
+  const missions         = useMapStore((s) => s.missions)
+  const filterQuery      = useMapStore((s) => s.filterQuery)
+  const filterType       = useMapStore((s) => s.filterType)
+  const selectedUid      = useMapStore((s) => s.selectedUid)
+  const selectedMissions = useMapStore((s) => s.selectedMissions)
+  const selectUnit       = useMapStore((s) => s.selectUnit)
+  const setFilterQuery   = useMapStore((s) => s.setFilterQuery)
+  const setFilterType    = useMapStore((s) => s.setFilterType)
+  const toggleMission    = useMapStore((s) => s.toggleMission)
+  const config           = useMapStore((s) => s.config)
 
   const eudList = useMemo(() => {
     return Object.values(euds)
@@ -70,13 +72,29 @@ export default function UnitSidebar() {
             />
           ))}
         {(filterType === 'all' || filterType === 'mission') &&
-          missions.map((m) => <MissionRow key={m.uid} mission={m} />)}
+          missions.map((m) => (
+            <MissionRow
+              key={m.name}
+              mission={m}
+              checked={selectedMissions.includes(m.name)}
+              onToggle={() => toggleMission(m.name)}
+            />
+          ))}
       </ul>
 
       <div className={styles.footer}>
         <span className={styles.online}>● {onlineCount}</span> online
         {' '}
         <span className={styles.mission}>● {missions.length}</span> misje
+        {selectedMissions.length > 0 && (
+          <span
+            className={styles.missionFilter}
+            title="Filtrujesz wg misji — kliknij, aby wyczyścić"
+            onClick={() => selectedMissions.forEach((n) => toggleMission(n))}
+          >
+            {' '}🔍 {selectedMissions.length}
+          </span>
+        )}
       </div>
     </aside>
   )
@@ -97,11 +115,23 @@ function EudRow({ eud, selected, onSelect }: {
   )
 }
 
-function MissionRow({ mission }: { mission: Mission }) {
+function MissionRow({ mission, checked, onToggle }: {
+  mission: Mission; checked: boolean; onToggle: () => void
+}) {
   return (
-    <li className={styles.missionRow}>
+    <li className={`${styles.missionRow} ${checked ? styles.missionActive : ''}`} onClick={onToggle}>
+      <input
+        type="checkbox"
+        className={styles.missionCheck}
+        checked={checked}
+        onChange={onToggle}
+        onClick={(e) => e.stopPropagation()}
+      />
       <span className={styles.missionIcon}>📋</span>
-      <span className={styles.missionName}>{mission.name}</span>
+      <div>
+        <div className={styles.missionName}>{mission.name}</div>
+        <div className={styles.meta}>{mission.uids.length} EUD</div>
+      </div>
     </li>
   )
 }
