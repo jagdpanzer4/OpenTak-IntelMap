@@ -10,6 +10,7 @@ class DefaultConfig:
     MAPTAK_TRACK_COLOR = '#00ff88'    # Track polyline color (CSS hex)
     MAPTAK_SHOW_OFFLINE_EUDS = True   # Show disconnected EUDs in sidebar
     MAPTAK_ONLY_ATAK_EUDS = True      # Only show EUDs with device/os/platform set
+    MAPTAK_SHAPES_STALE_DAYS = 0      # Max age of drawn shapes in days (0 = no limit)
 
     @staticmethod
     def update_config(new_config: dict, data_folder: str | None = None) -> dict:

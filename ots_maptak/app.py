@@ -252,15 +252,15 @@ class MapTAKPlugin(Plugin):
         from opentakserver.models.CoT import CoT
 
         try:
-            now = datetime.datetime.now(datetime.timezone.utc)
-            cots = (
+            stale_days = current_app.config.get('MAPTAK_SHAPES_STALE_DAYS', 0)
+            query = (
                 ots_db.session.query(CoT)
                 .filter(CoT.type.in_(['u-d-f', 'b-m-r', 'b-m-p-s-p-loc']))
-                .filter(CoT.stale >= now)
-                .order_by(CoT.timestamp.desc())
-                .limit(1000)
-                .all()
             )
+            if stale_days and int(stale_days) > 0:
+                cutoff = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=int(stale_days))
+                query = query.filter(CoT.timestamp >= cutoff)
+            cots = query.order_by(CoT.timestamp.desc()).limit(1000).all()
             shapes = [shape for cot in cots if (shape := _parse_cot_shape(cot)) is not None]
             return jsonify(shapes)
         except Exception as e:
