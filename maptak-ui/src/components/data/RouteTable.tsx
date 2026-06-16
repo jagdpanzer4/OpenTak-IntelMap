@@ -34,7 +34,7 @@ export default function RouteTable({ rows, selected, onToggle, onToggleAll, onDe
       emptyMessage="Brak tras"
       renderCell={(col, row) => {
         if (col.key === 'timestamp') return fmtTime(row.timestamp)
-        return String((row as Record<string, unknown>)[col.key] ?? '—')
+        return String((row as unknown as Record<string, unknown>)[col.key] ?? '—')
       }}
     />
   )

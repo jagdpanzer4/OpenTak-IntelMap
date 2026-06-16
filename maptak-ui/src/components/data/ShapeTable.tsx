@@ -41,7 +41,7 @@ export default function ShapeTable({ rows, selected, onToggle, onToggleAll, onDe
           ) : '—'
         }
         if (col.key === 'timestamp') return fmtTime(row.timestamp)
-        return String((row as Record<string, unknown>)[col.key] ?? '—')
+        return String((row as unknown as Record<string, unknown>)[col.key] ?? '—')
       }}
     />
   )

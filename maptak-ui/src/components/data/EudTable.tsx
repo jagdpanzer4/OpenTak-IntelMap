@@ -58,7 +58,7 @@ export default function EudTable({ rows, selected, onToggle, onToggleAll, onDele
           )
         }
         if (col.key === 'last_event_time') return formatTime(row.last_event_time)
-        return (row as Record<string, unknown>)[col.key] as string || '—'
+        return (row as unknown as Record<string, unknown>)[col.key] as string || '—'
       }}
     />
   )

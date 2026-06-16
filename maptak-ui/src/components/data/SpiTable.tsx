@@ -33,7 +33,7 @@ export default function SpiTable({ rows, selected, onToggle, onToggleAll, onDele
       emptyMessage="Brak punktów SPI"
       renderCell={(col, row) => {
         if (col.key === 'timestamp') return fmtTime(row.timestamp)
-        return String((row as Record<string, unknown>)[col.key] ?? '—')
+        return String((row as unknown as Record<string, unknown>)[col.key] ?? '—')
       }}
     />
   )

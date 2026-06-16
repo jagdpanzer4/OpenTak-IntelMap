@@ -40,7 +40,7 @@ export default function MarkerTable({ rows, selected, onToggle, onToggleAll, onD
       renderCell={(col, row) => {
         if (col.key === 'coords') return fmtCoords(row.latitude, row.longitude)
         if (col.key === 'timestamp') return fmtTime(row.timestamp)
-        return (row as Record<string, unknown>)[col.key] as string || '—'
+        return (row as unknown as Record<string, unknown>)[col.key] as string || '—'
       }}
     />
   )
